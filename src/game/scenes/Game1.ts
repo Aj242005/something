@@ -40,6 +40,9 @@ export class Game1 extends Scene {
         this.load.image('N','N.png')
         this.load.image('O','O.png')
         this.load.image('P','P.png')
+        this.load.image('l-2','l-2.png')
+        this.load.image('r-2','r-2.png')
+        this.load.image('t-2','t-2.png')
 
         this.load.image('wizard', 'baba.png');
         
@@ -134,6 +137,12 @@ export class Game1 extends Scene {
         platform21.setAlpha(0)
         const platform22= this.platforms.create(1556,  1055, 'P');
         platform22.setAlpha(0)
+        const platform23=this.platforms.create(28,  540, 'l-2');
+        platform23.setAlpha(0)
+        const platform24=this.platforms.create(1891,  540, 'r-2');
+        platform24.setAlpha(0)
+        const platform25=this.platforms.create(956,  77, 't-2');
+        platform25.setAlpha(0)
 
         
 

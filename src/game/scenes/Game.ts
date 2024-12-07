@@ -44,6 +44,9 @@ export class Game extends Scene {
         this.load.image('L1','L1.png')
         this.load.image('L2','L2.png')
         this.load.image('B1','B1.png')
+        this.load.image('l-1','l-1.png')
+        this.load.image('r-1','r-1.png')
+        this.load.image('t-1','t-1.png')
         
         this.load.image('wizard','baba1.png');
         this.load.image('sage', 'wiz2.png');  // Using same image for now, you can replace with different image
@@ -128,6 +131,12 @@ export class Game extends Scene {
         platform17.setAlpha(0)
         const platform18= this.platforms.create(1399,  1051, 'L2');
         platform18.setAlpha(0)
+        const platform19= this.platforms.create(960,  107, 't-1');
+        platform19.setAlpha(0)
+        const platform20= this.platforms.create(43,  494, 'l-1');
+        platform20.setAlpha(0)
+        const platform21= this.platforms.create(1896,  465, 'r-1');
+        platform21.setAlpha(0)
 
         
 

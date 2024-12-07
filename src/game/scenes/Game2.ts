@@ -34,6 +34,12 @@ export class Game2 extends Scene {
         this.load.image('Z1','Z1.svg')
         this.load.image('Z2','Z2.svg')
         this.load.image('Z3','Z3.svg')
+        this.load.image('l-3','l-3.png')
+        this.load.image('r-3','r-3.png')
+        this.load.image('t-3','t-3.png')
+        this.load.image('g-3','g-3.png')
+
+       
 
 
         
@@ -66,11 +72,16 @@ export class Game2 extends Scene {
         const platform1 = this.platforms.create(332,  836, 'T');
         platform1.setScale(1.6).refreshBody(); // Reduced scale
         platform1.setAlpha(1); // Slightly 
+        const platform12 = this.platforms.create(1589,  836, 'T');
         const platform2 = this.platforms.create(625,  627, 'U');
         platform2.setScale(1.6).refreshBody(); // Reduced scale
         platform2.setAlpha(1)
         platform2.setFlipX(true); // Slightly transparent
+        const platform13 = this.platforms.create(1291,  627, 'U');
         const platform3 = this.platforms.create(248,  263, 'V');
+        const platform11 = this.platforms.create(1561,  263, 'V');
+        platform11.setFlipX(true); // Slightly transparent
+
         // platform1.setScale(1.6).refreshBody(); // Reduced scale
         // platform3.setAlpha(1); // Slightly 
         const platform4= this.platforms.create(407,  966, 'W');
@@ -80,10 +91,14 @@ export class Game2 extends Scene {
         const platform5 = this.platforms.create(620,  299, 'X2');
         // platform1.setScale(1.6).refreshBody(); // Reduced scale
         // platform1.setAlpha(1); // Slightly 
+        const platform16= this.platforms.create(1617,  299, 'X2');
+        platform16.setFlipX(true); // Slightly transparent
         const platform6= this.platforms.create(678,  184, 'X1');
         // platform2.setScale(1.6).refreshBody(); // Reduced scale
         // platform2.setAlpha(1)
         // platform6.setFlipX(true); // Slightly transparent
+        const platform17 = this.platforms.create(1740,  184, 'X1');
+        platform17.setFlipX(true); // Slightly transparent
         const platform7 = this.platforms.create(567,  952, 'S');
         platform1.setScale(1.6).refreshBody(); // Reduced scale
         platform1.setAlpha(1); // Slightly 
@@ -97,6 +112,19 @@ export class Game2 extends Scene {
         const platform10 = this.platforms.create(1114,  840, 'Z3');
         platform10.setScale(1).refreshBody(); // Reduced scale
         platform1.setAlpha(1); // Slightly 
+        const platform18 = this.platforms.create(30,  549, 'l-3');
+        // platform18.setFlipX(true); // Slightly transparent
+        platform18.setAlpha(0);
+        const platform19 = this.platforms.create(1896,  549, 'r-3');
+        platform19.setAlpha(0);
+        const platform20 = this.platforms.create(964,  84, 't-3');
+        platform20.setAlpha(0);
+        const platform21 = this.platforms.create(964,  1056, 'g-3');
+        platform21.setAlpha(0);
+
+        
+        
+        
         // platform10.setFlipX(true); // Slightly transparent
         
 
