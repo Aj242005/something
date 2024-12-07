@@ -5,36 +5,38 @@ import { color } from "@coinbase/onchainkit/theme";
 
 const Home = () => {
     const [isGameStarted, setIsGameStarted] = useState(false);
+    const [showNewButtons, setShowNewButtons] = useState(false);
 
     const handlePlayClick = () => {
         setIsGameStarted(true);
     };
-    
-    
 
-
+    const handleCreateClick = () => {
+        setShowNewButtons(true);
+    };
+    
     return (
         <div className="relative">
             <div className="flex flex-col items-center mt-4 bg-white/10 rounded-lg p-6 shadow-lg backdrop-blur-md space-y-4">
-          <Wallet>
-            <ConnectWallet className="flex items-center space-x-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg shadow-md transition-transform duration-300 hover:scale-105">
-              <Avatar className="h-8 w-8 rounded-full" />
-              <span className="font-semibold">Connect Wallet</span>
-            </ConnectWallet>
-            <WalletDropdown>
-              <Identity className="px-4 pt-3 pb-2 text-white space-y-3 bg-gray-800 rounded-lg shadow-md">
-                <Avatar className="h-12 w-12" />
-                <Name className="font-bold text-lg" />
-                <Address className={`text-sm ${color.foregroundMuted}`} />
-                <EthBalance className="font-medium text-white/90" />
-              </Identity>
-              <WalletDropdownBasename className="text-sm text-gray-300 hover:text-white" />
-              <button className="mt-4 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md">
-                <WalletDropdownDisconnect />
-              </button>
-            </WalletDropdown>
-          </Wallet>
-        </div>
+                <Wallet>
+                    <ConnectWallet className="flex items-center space-x-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg shadow-md transition-transform duration-300 hover:scale-105">
+                        <Avatar className="h-8 w-8 rounded-full" />
+                        <span className="font-semibold">Connect Wallet</span>
+                    </ConnectWallet>
+                    <WalletDropdown>
+                        <Identity className="px-4 pt-3 pb-2 text-white space-y-3 bg-gray-800 rounded-lg shadow-md">
+                            <Avatar className="h-12 w-12" />
+                            <Name className="font-bold text-lg" />
+                            <Address className={`text-sm ${color.foregroundMuted}`} />
+                            <EthBalance className="font-medium text-white/90" />
+                        </Identity>
+                        <WalletDropdownBasename className="text-sm text-gray-300 hover:text-white" />
+                        <button className="mt-4 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md">
+                            <WalletDropdownDisconnect />
+                        </button>
+                    </WalletDropdown>
+                </Wallet>
+            </div>
             <div 
                 className="min-h-screen w-full"
                 style={{
@@ -44,48 +46,85 @@ const Home = () => {
                     backgroundRepeat: 'no-repeat'
                 }}
             />
-            {isGameStarted ? (
-    <div className="absolute top-1/4 left-0 w-full flex justify-center gap-32">  {/* Changed bottom-20 to top-1/4 and gap-8 to gap-32 */}
-        <button 
-            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
-            style={{
-                backgroundImage: "url('/assets/join_button.svg')",
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: 'transparent'
-            }}
-        />
-        <button 
-            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
-            style={{
-                backgroundImage: "url('/assets/create_button.svg')",
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: 'transparent'
-            }}
-        />
-    </div>
-) : (
-    <button 
-        onClick={handlePlayClick}
-        className="absolute bottom-0 left-0 w-full h-1/5 transform scale-[0.2]"
-        style={{
-            backgroundImage: "url('/assets/play_game.svg')",
-            backgroundSize: 'contain',
-            backgroundPosition: 'center bottom',
-            backgroundRepeat: 'no-repeat',
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: 'transparent'
-        }}
-    />
-)}
+            {isGameStarted && !showNewButtons ? (
+                <div className="absolute top-1/4 left-0 w-full flex justify-center gap-32">
+                    <button 
+                        className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                        style={{
+                            backgroundImage: "url('/assets/join_button.svg')",
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: 'transparent'
+                        }}
+                    />
+                    <button 
+                        onClick={handleCreateClick}
+                        className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                        style={{
+                            backgroundImage: "url('/assets/create_button.svg')",
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: 'transparent'
+                        }}
+                    />
+                </div>
+            ) : isGameStarted && showNewButtons ? (
+                <div className="absolute top-1/4 left-0 w-full flex flex-col items-center">
+                    <div className="mb-8">
+                        <img 
+                            src="/assets/select_topic.svg" 
+                            alt="Select Topic"
+                            className="w-[600px]"
+                        />
+                    </div>
+                    <div className="flex justify-center gap-32">
+                        <button 
+                            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                            style={{
+                                backgroundImage: "url('/assets/ZK_Math.svg')",
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                                border: 'none',
+                                cursor: 'pointer',
+                                backgroundColor: 'transparent'
+                            }}
+                        />
+                        <button 
+                            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                            style={{
+                                backgroundImage: "url('/assets/solidity.svg')",
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                                border: 'none',
+                                cursor: 'pointer',
+                                backgroundColor: 'transparent'
+                            }}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <button 
+                    onClick={handlePlayClick}
+                    className="absolute bottom-0 left-0 w-full h-1/5 transform scale-[0.2]"
+                    style={{
+                        backgroundImage: "url('/assets/play_game.svg')",
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center bottom',
+                        backgroundRepeat: 'no-repeat',
+                        border: 'none',
+                        cursor: 'pointer',
+                        backgroundColor: 'transparent'
+                    }}
+                />
+            )}
         </div>
     );
 };
