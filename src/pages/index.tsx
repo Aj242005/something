@@ -4,6 +4,7 @@ import { Address, Avatar, Name, Identity, EthBalance } from "@coinbase/onchainki
 import { color } from "@coinbase/onchainkit/theme";
 import RoomCode from '../components/RoomCode';
 import { ethers } from 'ethers';
+import JoinRoom from '../components/JoinRoom';
 
 // Define the ABI for the GameGateway contract
 const GAME_GATEWAY_ABI = [

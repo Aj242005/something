@@ -21,6 +21,8 @@ export class Game extends Scene {
     private sage!: Phaser.Physics.Arcade.Sprite;
     private hasHint: boolean = false;
     private quizCooldown: boolean = false;
+    targetZone: Phaser.GameObjects.Zone;
+    hintDialog: any;
 
     constructor() {
         super('Game');
@@ -49,7 +51,7 @@ export class Game extends Scene {
         this.load.image('t-1','t-1.png')
         
         this.load.image('wizard','baba1.png');
-        this.load.image('sage', 'wiz2.png');  // Using same image for now, you can replace with different image
+        this.load.image('sage', 'star.png');  // Using same image for now, you can replace with different image
 
         // Load player sprites
         this.load.image('still1', 'still1.png');
@@ -59,6 +61,8 @@ export class Game extends Scene {
         this.load.image('jump1', 'jump1.png');
         this.load.image('jump2', 'jump2.png');
         this.load.image('jump3', 'jump3.png');
+        this.load.image('question1', 'Q1normal.svg');
+        this.load.image('hint1', 'Q1Hint.svg');
         
         
         this.load.image('collectible', 'star.png');
@@ -203,7 +207,7 @@ export class Game extends Scene {
         // Add the sage character
         this.sage = this.physics.add.sprite(width * 0.8, height * 0.4, 'sage');
         this.sage.setBounce(0.1);
-        this.sage.setScale(0.05);
+        this.sage.setScale(1);
         this.sage.setGravityY(300);
         this.sage.setCollideWorldBounds(true);
         this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
@@ -224,6 +228,15 @@ export class Game extends Scene {
             undefined,
             this
         );
+        this.createhintDialog();
+        this.physics.add.overlap(
+            this.player,
+            this.wizard,
+            this.handleWizardInteraction,
+            undefined,
+            this
+        );
+
 
         // Add overlap with sage
         this.physics.add.overlap(
@@ -257,20 +270,11 @@ export class Game extends Scene {
         closeButton.on('pointerdown', () => this.closeQuiz());
         closeButton.on('pointerover', () => closeButton.setColor('#ff0000'));
         closeButton.on('pointerout', () => closeButton.setColor('#ffffff'));
+        const questionImage = this.add.image(0, -20, 'question1').setOrigin(0.5);
 
-        // Create question text
-        const questionText = this.add.text(0, -100, '', {
-            fontSize: '24px',
-            color: '#ffffff',
-            align: 'center',
-        }).setOrigin(0.5);
 
         // Create input field instructions
-        const instructions = this.add.text(0, 0, 'Type your answer below and press Enter:', {
-            fontSize: '16px',
-            color: '#ffffff',
-            align: 'center',
-        }).setOrigin(0.5);
+        
 
         // Create input field
         const input = document.createElement('input');
@@ -292,9 +296,55 @@ export class Game extends Scene {
 
         document.body.appendChild(input);
 
-        this.quizDialog.add([background, closeButton, questionText, instructions]);
+        this.quizDialog.add([background, closeButton, questionImage]);
         this.quizDialog.setVisible(false);
     }
+    private createhintDialog() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+    
+        // Create the hint dialog container
+        const hintDialog = this.add.container(width / 2, height / 2);
+    
+        // Create background
+        const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'quizInput';
+        input.style.position = 'fixed';
+        input.style.left = `${(width / 2) - 100}px`;
+        input.style.top = `${(height / 2) + 100}px`;
+        input.style.width = '200px';
+        input.style.padding = '8px';
+        input.style.fontSize = '16px';
+        input.style.border = '1px solid #4a90e2';
+        input.style.borderRadius = '4px';
+        input.style.color = '#000000';
+        input.style.backgroundColor = '#ffffff';
+        input.style.display = 'none';
+        input.style.zIndex = '1000';
+        input.style.opacity = '1';
+    
+        document.body.appendChild(input);
+    
+        // Create close button
+        const closeButton = this.add.text(170, -130, '×', {
+            fontSize: '32px',
+            color: '#ffffff',
+        }).setOrigin(0.5);
+        closeButton.setInteractive({ useHandCursor: true });
+        closeButton.on('pointerdown', () => hintDialog.setVisible(false));
+    
+        // Create hint image
+        const hintImage = this.add.image(0, -20, 'hint1').setOrigin(0.5);
+    
+        hintDialog.add([background, closeButton, hintImage]);
+        hintDialog.setVisible(false);
+    
+        // Assign to this.hintDialog
+        this.hintDialog = hintDialog;
+    }
+    
     
     private handleWizardInteraction() {
         if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {  // Check cooldown
@@ -324,22 +374,22 @@ export class Game extends Scene {
     private showQuestion() {
         const questions = [
             {
-                question: "What is 2 + 2?",
-                correct: "4",
-                hint: "Count your fingers twice"
+                questionImageKey: "question1", // Key for the question PNG
+                correct: "54",
+                
             },
         ];
     
         this.currentQuestion = questions[0];
-        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
-        let questionDisplay = this.currentQuestion.question;
+        const questionImage = this.quizDialog.getAt(2) as Phaser.GameObjects.Image;
+        questionImage.setTexture(this.currentQuestion.questionImageKey);
         
         // Add hint if collected
         if (this.hasHint) {
-            questionDisplay += `\n\nHint: ${this.currentQuestion.hint}`;
+            this.hintDialog.setVisible(true);
         }
         
-        questionText.setText(questionDisplay);
+        // questionText.setText(questionDisplay);
         this.quizDialog.setVisible(true);
 
         const input = document.getElementById('quizInput') as HTMLInputElement;
