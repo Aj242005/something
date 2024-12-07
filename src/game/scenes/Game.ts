@@ -49,7 +49,7 @@ export class Game extends Scene {
         this.load.image('l-1','l-1.png')
         this.load.image('r-1','r-1.png')
         this.load.image('t-1','t-1.png')
-        
+        this.load.image('correct_answer', 'correct_answer.svg');
         this.load.image('wizard','baba1.png');
         this.load.image('sage', 'star.png');  // Using same image for now, you can replace with different image
 
@@ -66,6 +66,8 @@ export class Game extends Scene {
         
         
         this.load.image('collectible', 'star.png');
+        this.load.image('wrong_answer', 'wrong_answer.svg');
+        this.load.image('correct_answer', 'correct_answer.svg');
     }
 
     create() {
@@ -196,7 +198,7 @@ export class Game extends Scene {
             undefined,
             this
         );
-        this.wizard = this.physics.add.sprite(540, 350, 'wizard');
+        this.wizard = this.physics.add.sprite(556, 150, 'wizard');
         this.wizard.setBounce(0.1);
         this.wizard.setScale(0.1);
         this.wizard.setGravityY(300); 
@@ -281,9 +283,9 @@ export class Game extends Scene {
         input.type = 'text';
         input.id = 'quizInput';
         input.style.position = 'fixed';
-        input.style.left = `${(width / 2) - 100}px`;
-        input.style.top = `${(height / 2) + 20}px`;
-        input.style.width = '200px';
+        input.style.left = `${(width / 2) - 120}px`;
+        input.style.top = `${(height / 2) + 34}px`;
+        input.style.width = '255px';
         input.style.padding = '8px';
         input.style.fontSize = '16px';
         input.style.border = '1px solid #4a90e2';
@@ -336,7 +338,7 @@ export class Game extends Scene {
         closeButton.on('pointerdown', () => hintDialog.setVisible(false));
     
         // Create hint image
-        const hintImage = this.add.image(0, -20, 'hint1').setOrigin(0.5);
+        const hintImage = this.add.image(0, -94, 'hint1').setOrigin(0.5);
     
         hintDialog.add([background, closeButton, hintImage]);
         hintDialog.setVisible(false);
@@ -347,10 +349,13 @@ export class Game extends Scene {
     
     
     private handleWizardInteraction() {
-        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {  // Check cooldown
+        // Check if quiz is not active and not completed
+        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {
             this.quizActive = true;
             this.showQuestion();
-            this.physics.pause();
+            
+            // Do not pause physics, allow player movement
+            // this.physics.pause(); // Comment out or remove this line
         }
     }
     
@@ -411,54 +416,80 @@ export class Game extends Scene {
         input.addEventListener('keydown', this.keydownListener);
     }
     
-    private checkAnswer(answer: string) {
+    private checkAnswer(userAnswer: string) {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        // Hide input
         const input = document.getElementById('quizInput') as HTMLInputElement;
-        
-        // Remove the event listener when checking answer
-        if (this.keydownListener) {
-            input.removeEventListener('keydown', this.keydownListener);
-            this.keydownListener = null;
-        }
-        
         input.style.display = 'none';
-        input.value = '';
 
-        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
-        if (answer === this.currentQuestion.correct) {
-            questionText.setText("Correct!");
-            this.quizCompleted = true;
+        // Disable interactions
+        this.quizDialog.getAt(2).setInteractive(false);
+        this.hintDialog.getAt(2).setInteractive(false);
+
+        // Check if the answer is correct (54)
+        if (userAnswer === '54') {
+            // Completely disable question1 and hint1
+            this.quizDialog.getAt(2).disableInteractive();
+            this.hintDialog.getAt(2).disableInteractive();
+
+            // Remove question1 image
+            const questionImage = this.quizDialog.getAt(1) as Phaser.GameObjects.Image;
+            questionImage.destroy();
+            this.quizDialog.destroy();
+            // Show correct answer image
+            const correctAnswerImage = this.add.image(
+                width / 2, 
+                height / 2, 
+                'correct_answer'
+            )
+                .setOrigin(0.5)
+                .setScale(0.5);
+
+            // Restore after 2 seconds
+            this.time.delayedCall(2000, () => {
+                // Remove correct answer image
+                correctAnswerImage.destroy();
+            });
         } else {
-            questionText.setText("Incorrect, try again!");
-            // Show the question again after a delay if answer was incorrect
-            setTimeout(() => {
-                this.showQuestion();
-            }, 1500);
-        }
+            // Show wrong answer image
+            const wrongAnswerImage = this.add.image(
+                width / 2, 
+                height / 2, 
+                'wrong_answer'
+            )
+                .setOrigin(0.5)
+                .setScale(0.5);
 
-        setTimeout(() => {
-            if (answer === this.currentQuestion.correct) {  // Only close if answer was correct
-                this.quizDialog.setVisible(false);
-                this.quizActive = false;
-                this.physics.resume();
-            }
-        }, 1500);
+            // Destroy quiz and hint dialogs
+            this.quizDialog.destroy();
+            this.hintDialog.destroy();
+
+            // Restore after 2 seconds
+            this.time.delayedCall(2000, () => {
+                // Show input again
+                input.style.display = 'block';
+                
+                // Remove wrong answer image
+                wrongAnswerImage.destroy();
+
+                // Re-enable interactions
+                this.createQuizDialog();
+            });
+        }
     }
-    
+
     private closeQuiz() {
         const input = document.getElementById('quizInput') as HTMLInputElement;
-        
-        // Remove the event listener when closing quiz
-        if (this.keydownListener) {
-            input.removeEventListener('keydown', this.keydownListener);
-            this.keydownListener = null;
-        }
-        
         input.style.display = 'none';
         input.value = '';
 
         this.quizDialog.setVisible(false);
         this.quizActive = false;
-        this.physics.resume();
+        
+        // Do not resume physics to maintain player movement
+        // this.physics.resume(); // Comment out or remove this line
         
         // Set cooldown
         this.quizCooldown = true;

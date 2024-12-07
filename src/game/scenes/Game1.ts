@@ -280,7 +280,7 @@ export class Game1 extends Scene {
         closeButton.on('pointerdown', () => this.closeQuiz());
         closeButton.on('pointerover', () => closeButton.setColor('#ff0000'));
         closeButton.on('pointerout', () => closeButton.setColor('#ffffff'));
-        const questionImage = this.add.image(0, -20, 'question2').setOrigin(0.5);
+        const questionImage = this.add.image(0, -83, 'question2').setOrigin(0.5);
 
 
         // Create input field instructions
@@ -346,7 +346,7 @@ export class Game1 extends Scene {
         closeButton.on('pointerdown', () => hintDialog.setVisible(false));
     
         // Create hint image
-        const hintImage = this.add.image(0, -20, 'hint2').setOrigin(0.5);
+        const hintImage = this.add.image(0, -146, 'hint2').setOrigin(0.5);
     
         hintDialog.add([background, closeButton, hintImage]);
         hintDialog.setVisible(false);
