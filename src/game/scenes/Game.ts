@@ -7,11 +7,15 @@ export class Game extends Scene {
     private player!: Phaser.Physics.Arcade.Sprite;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private stars!: Phaser.Physics.Arcade.Group;
-    private modal!: Phaser.GameObjects.Container;
+    private modal!: Phaser.GameObjects.Rectangle;
     private score: number = 0;
     private groundTop!: Phaser.Physics.Arcade.StaticGroup;
     // private groundBottom!: Phaser.Physics.Arcade.StaticGroup;
     private modalElements!: any;
+    private wizard!: Phaser.Physics.Arcade.Sprite;
+    private quizActive: boolean = false;
+    private currentQuestion: any = null;
+    private quizDialog!: Phaser.GameObjects.Container;
 
     constructor() {
         super('Game');
@@ -35,18 +39,20 @@ export class Game extends Scene {
         this.load.image('L1','L1.png')
         this.load.image('L2','L2.png')
         this.load.image('B1','B1.png')
+        
+        this.load.image('wizard','still position 1.png');
 
 
 
         
         // Load player sprites
-        this.load.image('still1', 'still position 1.png');
-        this.load.image('still2', 'still position 2.png');
-        this.load.image('walk1', 'walking positon 1.png');
-        this.load.image('walk2', 'walking position 2.png');
-        this.load.image('jump1', 'jumping pposition 1.png');
-        this.load.image('jump2', 'jumping position 2.png');
-        this.load.image('jump3', 'jumping position 3.png');
+        this.load.image('still1', 'still1.png');
+        this.load.image('still2', 'still2.png');
+        this.load.image('walk1', 'walk1.png');
+        this.load.image('walk2', 'walk2.png');
+        this.load.image('jump1', 'jump1.png');
+        this.load.image('jump2', 'jump2.png');
+        this.load.image('jump3', 'jump3.png');
         
         
         this.load.image('collectible', 'star.png');
@@ -60,25 +66,7 @@ export class Game extends Scene {
         // Add background
         const bg = this.add.image(width/2, height/2, 'sky');
         bg.setDisplaySize(width, height );
-        
-        // Remove the blue background color since we have an image
-        // this.cameras.main.setBackgroundColor('#1e90ff');  // Dodger blue sky color
-
-        // Create ground layers
-        // this.groundBottom = this.physics.add.staticGroup();
         this.groundTop = this.physics.add.staticGroup();
-
-        // Create ground from wider platforms - bottom layer
-        // const bottom = this.groundBottom.create(width/2, height , 'ground-bottom');
-        // bottom.setScale(1000, 15).refreshBody();
-        // bottom.setAlpha(0); // Added transparency
-
-        // Create ground from wider platforms - top layer (slightly above)
-        // const top = this.groundTop.create(width/2, height - 25, 'ground-top');
-        // top.setScale(1000, 5).refreshBody();
-        // top.setAlpha(0.5); // Added transparency for top layer if uncommented
-
-        // Create platforms with a more interesting layout
         this.platforms = this.physics.add.staticGroup();
 
         // Create a single tile platform
@@ -178,206 +166,233 @@ export class Game extends Scene {
         this.player = this.physics.add.sprite(width * 0.1, height * 0.4, 'still1');
         this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(0.06);
+        this.player.setScale(0.07);
         
         // Start with idle animation
         this.player.play('idle');
+        this.wizard = this.physics.add.sprite(540, 350, 'wizard');
+        this.wizard.setBounce(0.1);
+        this.wizard.setScale(0.05);
+        this.wizard.setGravityY(300); 
+        // this.wizard.setImmovable(true);
+        this.wizard.setCollideWorldBounds(true);
+        this.wizard.play('idle');
 
-        // Add collisions
-        // this.physics.add.collider(this.player, this.groundBottom);
+        // Add Collisions
         this.physics.add.collider(this.player, this.platforms);
-
-        // Add stars with better distribution
-        // this.stars = this.physics.add.group({
-        //     key: 'collectible',
-        //     repeat: 8,
-        //     setXY: { 
-        //         x: width * 0.1, 
-        //         y: 0, 
-        //         stepX: width * 0.12 
-        //     }
-        // });
-
-        // // Customize each star
-        // this.stars.children.iterate((child: any) => {
-        //     child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-        //     child.setScale(0.8);
-        //     // Add glow effect
-        //     const glow = this.add.circle(child.x, child.y, 20, 0xffff00, 0.2);
-        //     this.tweens.add({
-        //         targets: glow,
-        //         alpha: 0,
-        //         duration: 1000,
-        //         yoyo: true,
-        //         repeat: -1
-        //     });
-        // });
-
-        // Set up collisions
-        // this.physics.add.collider(this.stars, this.groundTop);
-        // this.physics.add.collider(this.stars, this.groundBottom);
-        // this.physics.add.collider(this.stars, this.platforms);
-        // this.physics.add.overlap(this.player, this.stars, this.collectStar, undefined, this);
+        this.physics.add.collider(this.wizard, this.platforms);
 
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.createQuizDialog();
+        this.physics.add.overlap(
+            this.player,
+            this.wizard,
+            this.handleWizardInteraction,
+            undefined,
+            this
+        );
+
         // Create modal
-        this.createModal();
+        // this.createModal();
 
         EventBus.emit('current-scene-ready', this);
     }
-
-    private createModal() {
-        // Get window dimensions
+    private createQuizDialog() {
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const centerX = width / 2;
-        const centerY = height / 2;
-
-        // Create modal background
-        this.modal = this.add.rectangle(centerX, centerY, 400, 300, 0x000000);
-        this.modal.setStrokeStyle(2, 0x4a90e2);
-        this.modal.setAlpha(0.8);
-        this.modal.setVisible(false);
-
-        // Create modal text with improved styling
-        const modalText = this.add.text(centerX, centerY - 80, 'You collected a star!', {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            align: 'center'
-        });
-        modalText.setOrigin(0.5);
-        modalText.setVisible(false);
-
-        // Create score text with improved styling
-        const scoreText = this.add.text(centerX, centerY - 30, 'Enter your name:', {
+    
+        this.quizDialog = this.add.container(width / 2, height / 2);
+    
+        // Create background
+        const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
+    
+        // Create question text
+        const questionText = this.add.text(0, -100, '', {
             fontSize: '24px',
             color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            align: 'center'
-        });
-        scoreText.setOrigin(0.5);
-        scoreText.setVisible(false);
-
-        // Create HTML input element with improved styling
+            align: 'center',
+        }).setOrigin(0.5);
+    
+        // Create input field instructions
+        const instructions = this.add.text(0, 0, 'Type your answer below and press Enter:', {
+            fontSize: '16px',
+            color: '#ffffff',
+            align: 'center',
+        }).setOrigin(0.5);
+    
+        // Create input field
         const input = document.createElement('input');
         input.type = 'text';
-        input.id = 'nameInput';
+        input.id = 'quizInput';
         input.style.position = 'fixed';
-        input.style.left = `${centerX - 100}px`;
-        input.style.top = `${centerY + 10}px`;
+        input.style.left = `${(width / 2) - 100}px`;
+        input.style.top = `${(height / 2) + 20}px`;
         input.style.width = '200px';
-        input.style.padding = '12px';
+        input.style.padding = '8px';
         input.style.fontSize = '16px';
-        input.style.borderRadius = '8px';
-        input.style.border = '2px solid #4a90e2';
-        input.style.outline = 'none';
-        input.style.textAlign = 'center';
+        input.style.border = '1px solid #4a90e2';
+        input.style.borderRadius = '4px';
+        input.style.color = '#000000';
+        input.style.backgroundColor = '#ffffff';
         input.style.display = 'none';
-        input.style.zIndex = '1000';
-        input.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        input.style.color = '#2c3e50';
-        input.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-        input.style.transition = 'all 0.3s ease';
+        input.style.zIndex = '1000'; // Ensure it's above Phaser canvas
+        input.style.opacity = '1'; // Make sure it's visible
 
-        // Add hover effect
-        input.style.transition = 'all 0.3s ease';
-        input.addEventListener('mouseover', () => {
-            input.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-        });
-        input.addEventListener('mouseout', () => {
-            input.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-        });
-
-        // Prevent Phaser from capturing keyboard events when input is focused
-        input.addEventListener('keydown', (e) => {
-            e.stopPropagation();
-            if (e.key === 'Enter') {
-                this.closeModal();
+    
+        document.body.appendChild(input);
+    
+        this.quizDialog.add([background, questionText, instructions]);
+        this.quizDialog.setVisible(false);
+    
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.quizActive) {
+                this.closeQuiz();
             }
         });
-
-        document.body.appendChild(input);
-
-        // Create continue button with improved styling
-        const continueButton = this.add.rectangle(centerX, centerY + 80, 200, 50, 0x4a90e2);
-        continueButton.setInteractive();
-        continueButton.setVisible(false);
-
-        // Add hover effect to continue button
-        continueButton.on('pointerover', () => {
-            continueButton.setFillStyle(0x357abd);
-            document.body.style.cursor = 'pointer';
-        });
-        continueButton.on('pointerout', () => {
-            continueButton.setFillStyle(0x4a90e2);
-            document.body.style.cursor = 'default';
-        });
-
-        const continueText = this.add.text(centerX, centerY + 80, 'Continue', {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontFamily: 'Arial, sans-serif'
-        });
-        continueText.setOrigin(0.5);
-        continueText.setVisible(false);
-
-        // Add click handler to continue button
-        continueButton.on('pointerdown', () => this.closeModal());
-
-        // Store modal elements for later use
-        this.modalElements = {
-            background: this.modal,
-            text: modalText,
-            scoreText: scoreText,
-            input: input,
-            continueButton: continueButton,
-            continueText: continueText
-        };
     }
-
-    private collectStar(player: Phaser.Physics.Arcade.Sprite, star: Phaser.Physics.Arcade.Sprite) {
-        star.destroy();
-        this.score += 10;
-
-        // Show modal and input
-        const scoreText = this.modalElements.scoreText;
-        scoreText.setText('Score: ' + this.score);
-        this.modalElements.background.setVisible(true);
-        this.modalElements.text.setVisible(true);
-        this.modalElements.scoreText.setVisible(true);
-        this.modalElements.input.style.display = 'block';
-        this.modalElements.input.focus();
-        this.modalElements.continueButton.setVisible(true);
-        this.modalElements.continueText.setVisible(true);
-
-        // Pause game physics while modal is shown
-        this.physics.pause();
-    }
-
-    private closeModal() {
-        if (this.modalElements.background.visible) {
-            const inputElement = document.getElementById('nameInput') as HTMLInputElement;
-            const enteredText = inputElement.value;
-            console.log('Text entered:', enteredText);
-            
-            // Clear the input
-            inputElement.value = '';
-            inputElement.style.display = 'none';
-            this.modalElements.background.setVisible(false);
-            this.modalElements.text.setVisible(false);
-            this.modalElements.scoreText.setVisible(false);
-            this.modalElements.continueButton.setVisible(false);
-            this.modalElements.continueText.setVisible(false);
-            this.physics.resume();
+    
+    private handleWizardInteraction() {
+        if (!this.quizActive) {
+            this.quizActive = true;
+            this.showQuestion();
+            this.physics.pause();
         }
     }
+    
+    private showQuestion() {
+        const questions = [
+            {
+                question: "What is 2 + 2?",
+                correct: "4",
+            },
+        ];
+    
+        this.currentQuestion = questions[0];
+        const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+        questionText.setText(this.currentQuestion.question);
+        this.quizDialog.setVisible(true);
+    
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        input.style.display = 'block';
+        input.focus();
+    
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const userAnswer = input.value.trim();
+                this.checkAnswer(userAnswer);
+            }
+        });
+    }
+    
+    private checkAnswer(answer: string) {
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        input.style.display = 'none';
+        input.value = '';
+    
+        const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+        if (answer === this.currentQuestion.correct) {
+            questionText.setText("Correct!");
+        } else {
+            questionText.setText("Incorrect, try again!");
+        }
+    
+        setTimeout(() => {
+            this.quizDialog.setVisible(false);
+            this.quizActive = false;
+            this.physics.resume();
+        }, 1500);
+    }
+    
+    private closeQuiz() {
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        input.style.display = 'none';
+        input.value = '';
+    
+        this.quizDialog.setVisible(false);
+        this.quizActive = false;
+        this.physics.resume();
+    }
+    
+    // private createQuizDialog() {
+    //     const width = window.innerWidth;
+    //     const height = window.innerHeight;
+        
+    //     this.quizDialog = this.add.container(width/2, height/2);
+        
+    //     // Create background
+    //     const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
+        
+    //     // Create question text
+    //     const questionText = this.add.text(0, -100, '', {
+    //         fontSize: '24px',
+    //         color: '#ffffff',
+    //         align: 'center'
+    //     }).setOrigin(0.5);
+        
+    //     // Create answer buttons
+    //     const answers = ['3', '4', '5'].map((letter, index) => {
+    //         const button = this.add.rectangle(-100 + (index * 100), 50, 80, 40, 0x4a90e2);
+    //         const text = this.add.text(-100 + (index * 100), 50, letter, {
+    //             fontSize: '20px',
+    //             color: '#ffffff'
+    //         }).setOrigin(0.5);
+            
+    //         button.setInteractive();
+    //         button.on('pointerdown', () => this.handleAnswer(letter));
+            
+    //         return [button, text];
+    //     }).flat();
+        
+    //     this.quizDialog.add([background, questionText, ...answers]);
+    //     this.quizDialog.setVisible(false);
+    // }
+    // private handleWizardInteraction() {
+    //     if (!this.quizActive) {
+    //         this.quizActive = true;
+    //         this.showQuestion();
+    //         this.physics.pause();
+    //     }
+    // }
+    // private showQuestion() {
+    //     const questions = [
+    //         {
+    //             question: "What is 2 + 2?",
+    //             answers: ["3", "4", "5"],
+    //             correct: "4"
+    //         }
+    //         // Add more questions here
+    //     ];
+        
+    //     this.currentQuestion = questions[0];
+    //     const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+    //     questionText.setText(this.currentQuestion.question);
+    //     this.quizDialog.setVisible(true);
+    // }
+
+    // // NEW: Answer handling method
+    // private handleAnswer(answer: string) {
+    //     if (this.currentQuestion && answer === this.currentQuestion.correct) {
+    //         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+    //         questionText.setText("Correct!");
+            
+    //         setTimeout(() => {
+    //             this.quizDialog.setVisible(false);
+    //             this.quizActive = false;
+    //             this.physics.resume();
+    //         }, 1500);
+    //     } else {
+    //         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+    //         questionText.setText("Try again!");
+    //     }
+    // }
+
+    
 
     update() {
         // Only process movement if modal is not visible and input is not focused
-        if (this.modalElements.background.visible || document.activeElement?.id === 'nameInput') return;
+        // if (this.modalElements.background.visible || document.activeElement?.id === 'nameInput') return;
 
         const onGround = this.player.body.touching.down;
 

@@ -1,4 +1,6 @@
 import { Game as MainGame } from './scenes/Game';
+import {Game1 as MainGame1} from './scenes/Game1';
+import {Game2 as MainGame2} from './scenes/Game2';
 import { AUTO, Game, Types } from "phaser";
 
 const config: Types.Core.GameConfig = {
@@ -18,7 +20,7 @@ const config: Types.Core.GameConfig = {
             debug: false
         }
     },
-    scene: [MainGame]
+    scene: [MainGame,MainGame1,MainGame2]
 };
 
 const StartGame = (parent: string) => {
