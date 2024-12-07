@@ -3,13 +3,15 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownBasename, WalletDr
 import { Address, Avatar, Name, Identity, EthBalance } from "@coinbase/onchainkit/identity";
 import { color } from "@coinbase/onchainkit/theme";
 import RoomCode from '../components/RoomCode';
+import JoinRoom from '../components/JoinRoom';
 
 const Home = () => {
     const [isGameStarted, setIsGameStarted] = useState(false);
     const [showNewButtons, setShowNewButtons] = useState(false);
     const [showRoomCode, setShowRoomCode] = useState(false);
+    const [showJoinRoom, setShowJoinRoom] = useState(false);
     const [selectedTopic, setSelectedTopic] = useState<'zk' | 'solidity' | null>(null);
-    const [roomCode, setRoomCode] = useState<string>("000000000");
+    const [roomCode, setRoomCode] = useState<string>("111111111");
 
     const handlePlayClick = () => {
         setIsGameStarted(true);
@@ -17,6 +19,11 @@ const Home = () => {
 
     const handleCreateClick = () => {
         setShowNewButtons(true);
+    };
+
+    const handleJoinClick = () => {
+        setShowNewButtons(false);
+        setShowJoinRoom(true);
     };
 
     const handleTopicClick = (topic: 'zk' | 'solidity') => {
@@ -35,6 +42,11 @@ const Home = () => {
     const handleCopyCode = () => {
         navigator.clipboard.writeText(roomCode);
         alert('Code copied to clipboard!');
+    };
+
+    const handleJoinRoom = (enteredRoomCode: string) => {
+        console.log('Joining room with code:', enteredRoomCode);
+        // Add your join room logic here
     };
 
     return (
@@ -68,9 +80,10 @@ const Home = () => {
                     backgroundRepeat: 'no-repeat'
                 }}
             />
-            {isGameStarted && !showNewButtons ? (
+            {isGameStarted && !showNewButtons && !showJoinRoom ? (
                 <div className="absolute top-1/4 left-0 w-full flex justify-center gap-32">
                     <button 
+                        onClick={handleJoinClick}
                         className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
                         style={{
                             backgroundImage: "url('/assets/join_button.svg')",
@@ -145,6 +158,12 @@ const Home = () => {
                             />
                         </div>
                     )}
+                </div>
+            ) : isGameStarted && showJoinRoom ? (
+                <div className="absolute top-1/4 left-0 w-full flex justify-center items-center">
+                    <JoinRoom 
+                        onJoinRoom={handleJoinRoom}
+                    />
                 </div>
             ) : (
                 <button 
