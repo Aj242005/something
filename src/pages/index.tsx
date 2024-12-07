@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownBasename, WalletDropdownDisconnect } from "@coinbase/onchainkit/wallet";
 import { Address, Avatar, Name, Identity, EthBalance } from "@coinbase/onchainkit/identity";
 import { color } from "@coinbase/onchainkit/theme";
+import RoomCode from '../components/RoomCode';
 
 const Home = () => {
     const [isGameStarted, setIsGameStarted] = useState(false);
     const [showNewButtons, setShowNewButtons] = useState(false);
+    const [showRoomCode, setShowRoomCode] = useState(false);
+    const [selectedTopic, setSelectedTopic] = useState<'zk' | 'solidity' | null>(null);
+    const [roomCode, setRoomCode] = useState<string>("000000000");
 
     const handlePlayClick = () => {
         setIsGameStarted(true);
@@ -14,7 +18,25 @@ const Home = () => {
     const handleCreateClick = () => {
         setShowNewButtons(true);
     };
-    
+
+    const handleTopicClick = (topic: 'zk' | 'solidity') => {
+        setSelectedTopic(topic);
+        // Generate or set room code based on topic
+        const newRoomCode = '111111111';
+        setRoomCode(newRoomCode);
+        setShowRoomCode(true);
+    };
+
+    const handleStartGame = () => {
+        console.log('Starting game with code:', roomCode);
+        // Add your game start logic here
+    };
+
+    const handleCopyCode = () => {
+        navigator.clipboard.writeText(roomCode);
+        alert('Code copied to clipboard!');
+    };
+
     return (
         <div className="relative">
             <div className="flex flex-col items-center mt-4 bg-white/10 rounded-lg p-6 shadow-lg backdrop-blur-md space-y-4">
@@ -76,39 +98,53 @@ const Home = () => {
                 </div>
             ) : isGameStarted && showNewButtons ? (
                 <div className="absolute top-1/4 left-0 w-full flex flex-col items-center">
-                    <div className="mb-8">
-                        <img 
-                            src="/assets/select_topic.svg" 
-                            alt="Select Topic"
-                            className="w-[600px]"
-                        />
-                    </div>
-                    <div className="flex justify-center gap-32">
-                        <button 
-                            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
-                            style={{
-                                backgroundImage: "url('/assets/ZK_Math.svg')",
-                                backgroundSize: 'contain',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                border: 'none',
-                                cursor: 'pointer',
-                                backgroundColor: 'transparent'
-                            }}
-                        />
-                        <button 
-                            className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
-                            style={{
-                                backgroundImage: "url('/assets/solidity.svg')",
-                                backgroundSize: 'contain',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                border: 'none',
-                                cursor: 'pointer',
-                                backgroundColor: 'transparent'
-                            }}
-                        />
-                    </div>
+                    {!showRoomCode ? (
+                        <>
+                            <div className="mb-8">
+                                <img 
+                                    src="/assets/select_topic.svg" 
+                                    alt="Select Topic"
+                                    className="w-[600px]"
+                                />
+                            </div>
+                            <div className="flex justify-center gap-32">
+                                <button 
+                                    onClick={() => handleTopicClick('zk')}
+                                    className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                                    style={{
+                                        backgroundImage: "url('/assets/ZK_Math.svg')",
+                                        backgroundSize: 'contain',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                />
+                                <button 
+                                    onClick={() => handleTopicClick('solidity')}
+                                    className="w-[486px] h-[122px] transform hover:scale-110 transition-transform"
+                                    style={{
+                                        backgroundImage: "url('/assets/solidity.svg')",
+                                        backgroundSize: 'contain',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'transparent'
+                                    }}
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex justify-center items-center min-h-[20vh]">
+                            <RoomCode 
+                                numbers={roomCode}
+                                onStartGame={handleStartGame}
+                                onCopyCode={handleCopyCode}
+                            />
+                        </div>
+                    )}
                 </div>
             ) : (
                 <button 
