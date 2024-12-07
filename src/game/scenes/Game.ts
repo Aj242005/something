@@ -16,6 +16,8 @@ export class Game extends Scene {
     private quizActive: boolean = false;
     private currentQuestion: any = null;
     private quizDialog!: Phaser.GameObjects.Container;
+    private quizCompleted: boolean = false;
+    private keydownListener: ((event: KeyboardEvent) => void) | null = null;
 
     constructor() {
         super('Game');
@@ -254,7 +256,7 @@ export class Game extends Scene {
     }
     
     private handleWizardInteraction() {
-        if (!this.quizActive) {
+        if (!this.quizActive && !this.quizCompleted) {  // Check if quiz is not completed
             this.quizActive = true;
             this.showQuestion();
             this.physics.pause();
@@ -273,122 +275,75 @@ export class Game extends Scene {
         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
         questionText.setText(this.currentQuestion.question);
         this.quizDialog.setVisible(true);
-    
+
         const input = document.getElementById('quizInput') as HTMLInputElement;
         input.style.display = 'block';
         input.focus();
-    
-        input.addEventListener('keydown', (event) => {
+
+        // Remove existing event listener if it exists
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+        }
+
+        // Create and store new event listener
+        this.keydownListener = (event: KeyboardEvent) => {
             if (event.key === 'Enter') {
                 const userAnswer = input.value.trim();
                 this.checkAnswer(userAnswer);
             }
-        });
+        };
+        input.addEventListener('keydown', this.keydownListener);
     }
     
     private checkAnswer(answer: string) {
         const input = document.getElementById('quizInput') as HTMLInputElement;
+        
+        // Remove the event listener when checking answer
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+            this.keydownListener = null;
+        }
+        
         input.style.display = 'none';
         input.value = '';
-    
+
         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
         if (answer === this.currentQuestion.correct) {
             questionText.setText("Correct!");
+            this.quizCompleted = true;
         } else {
             questionText.setText("Incorrect, try again!");
+            // Show the question again after a delay if answer was incorrect
+            setTimeout(() => {
+                this.showQuestion();
+            }, 1500);
         }
-    
+
         setTimeout(() => {
-            this.quizDialog.setVisible(false);
-            this.quizActive = false;
-            this.physics.resume();
+            if (answer === this.currentQuestion.correct) {  // Only close if answer was correct
+                this.quizDialog.setVisible(false);
+                this.quizActive = false;
+                this.physics.resume();
+            }
         }, 1500);
     }
     
     private closeQuiz() {
         const input = document.getElementById('quizInput') as HTMLInputElement;
+        
+        // Remove the event listener when closing quiz
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+            this.keydownListener = null;
+        }
+        
         input.style.display = 'none';
         input.value = '';
-    
+
         this.quizDialog.setVisible(false);
         this.quizActive = false;
         this.physics.resume();
     }
-    
-    // private createQuizDialog() {
-    //     const width = window.innerWidth;
-    //     const height = window.innerHeight;
-        
-    //     this.quizDialog = this.add.container(width/2, height/2);
-        
-    //     // Create background
-    //     const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
-        
-    //     // Create question text
-    //     const questionText = this.add.text(0, -100, '', {
-    //         fontSize: '24px',
-    //         color: '#ffffff',
-    //         align: 'center'
-    //     }).setOrigin(0.5);
-        
-    //     // Create answer buttons
-    //     const answers = ['3', '4', '5'].map((letter, index) => {
-    //         const button = this.add.rectangle(-100 + (index * 100), 50, 80, 40, 0x4a90e2);
-    //         const text = this.add.text(-100 + (index * 100), 50, letter, {
-    //             fontSize: '20px',
-    //             color: '#ffffff'
-    //         }).setOrigin(0.5);
-            
-    //         button.setInteractive();
-    //         button.on('pointerdown', () => this.handleAnswer(letter));
-            
-    //         return [button, text];
-    //     }).flat();
-        
-    //     this.quizDialog.add([background, questionText, ...answers]);
-    //     this.quizDialog.setVisible(false);
-    // }
-    // private handleWizardInteraction() {
-    //     if (!this.quizActive) {
-    //         this.quizActive = true;
-    //         this.showQuestion();
-    //         this.physics.pause();
-    //     }
-    // }
-    // private showQuestion() {
-    //     const questions = [
-    //         {
-    //             question: "What is 2 + 2?",
-    //             answers: ["3", "4", "5"],
-    //             correct: "4"
-    //         }
-    //         // Add more questions here
-    //     ];
-        
-    //     this.currentQuestion = questions[0];
-    //     const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
-    //     questionText.setText(this.currentQuestion.question);
-    //     this.quizDialog.setVisible(true);
-    // }
-
-    // // NEW: Answer handling method
-    // private handleAnswer(answer: string) {
-    //     if (this.currentQuestion && answer === this.currentQuestion.correct) {
-    //         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
-    //         questionText.setText("Correct!");
-            
-    //         setTimeout(() => {
-    //             this.quizDialog.setVisible(false);
-    //             this.quizActive = false;
-    //             this.physics.resume();
-    //         }, 1500);
-    //     } else {
-    //         const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
-    //         questionText.setText("Try again!");
-    //     }
-    // }
-
-    
 
     update() {
         // Only process movement if modal is not visible and input is not focused

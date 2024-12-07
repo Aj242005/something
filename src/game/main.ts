@@ -20,7 +20,7 @@ const config: Types.Core.GameConfig = {
             debug: false
         }
     },
-    scene: [MainGame1,MainGame,MainGame2]
+    scene: [MainGame,MainGame1,MainGame2]
 };
 
 const StartGame = (parent: string) => {
