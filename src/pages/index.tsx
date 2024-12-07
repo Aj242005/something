@@ -156,6 +156,7 @@ const Home: React.FC = () => {
                 const newContract = new ethers.Contract("0xE99C30a3703824963deebDD772289B288CC673e7", newABI, newWallet);
                 const tx = await newContract.initializeGame(signerAddress, gameType, roomNumber);
                 console.log('Transaction sent:', tx);
+                alert('Game created successfully! on base network with hash: ' + tx.hash);
                 setShowRoomCode(true);
             } else {
                 alert('MetaMask is not installed. Please install it to play.');
