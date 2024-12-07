@@ -14,14 +14,14 @@ export class Game1 extends Scene {
     private modalElements!: any;
 
     constructor() {
-        super('Game1');
+        super('MainGame1');
     }
 
     preload() {
         this.load.setPath('assets');
         
         // Load game assets
-        this.load.image('sky', 'level2.png');
+        this.load.image('sky1', 'level2.png');
         this.load.image('ground-top', 'top.svg');
         // this.load.image('ground-bottom', 'botoom.svg');
         this.load.image('tile', '222.svg');  // Load the tile image
@@ -41,16 +41,19 @@ export class Game1 extends Scene {
         this.load.image('O','O.png')
         this.load.image('P','P.png')
 
+        this.load.image('wizard', 'baba.png');
+        
+
 
         
         // Load player sprites
-        this.load.image('still1', 'still position 1.png');
-        this.load.image('still2', 'still position 2.png');
-        this.load.image('walk1', 'walking positon 1.png');
-        this.load.image('walk2', 'walking position 2.png');
-        this.load.image('jump1', 'jumping pposition 1.png');
-        this.load.image('jump2', 'jumping position 2.png');
-        this.load.image('jump3', 'jumping position 3.png');
+        this.load.image('still1', 'still1.png');
+        this.load.image('still2', 'still2.png');
+        this.load.image('walk1', 'walk1.png');
+        this.load.image('walk2', 'walk2.png');
+        this.load.image('jump1', 'jump1.png');
+        this.load.image('jump2', 'jump2.png');
+        this.load.image('jump3', 'jump3.png');
         
         
         this.load.image('collectible', 'star.png');
@@ -62,7 +65,7 @@ export class Game1 extends Scene {
         const height = window.innerHeight;
         console.log(width,height)
         // Add background
-        const bg = this.add.image(width/2, height/2, 'sky');
+        const bg = this.add.image(width/2, height/2, 'sky1');
         bg.setDisplaySize(width, height );
         this.groundTop = this.physics.add.staticGroup();
 
@@ -176,202 +179,234 @@ export class Game1 extends Scene {
         
         // Start with idle animation
         this.player.play('idle');
+        this.wizard = this.physics.add.sprite(540, 350, 'wizard');
+        this.wizard.setBounce(0.1);
+        this.wizard.setScale(0.1);
+        this.wizard.setGravityY(300); 
+        // this.wizard.setImmovable(true);
+        this.wizard.setFlipX(true);
+        // this.wizard.setCollideWorldBounds(true);
+        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
+        
+        // Debug visualization of the zone (remove in production)
+        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+
+        // Add overlap detection for scene transition
+        this.physics.add.overlap(
+            this.player,
+            this.targetZone,
+            () => this.scene.start('MainGame2'),
+            undefined,
+            this
+        );
+
 
         // Add collisions
         // this.physics.add.collider(this.player, this.groundBottom);
         this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.wizard, this.platforms);
 
-        // Add stars with better distribution
-        // this.stars = this.physics.add.group({
-        //     key: 'collectible',
-        //     repeat: 8,
-        //     setXY: { 
-        //         x: width * 0.1, 
-        //         y: 0, 
-        //         stepX: width * 0.12 
-        //     }
-        // });
-
-        // // Customize each star
-        // this.stars.children.iterate((child: any) => {
-        //     child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-        //     child.setScale(0.8);
-        //     // Add glow effect
-        //     const glow = this.add.circle(child.x, child.y, 20, 0xffff00, 0.2);
-        //     this.tweens.add({
-        //         targets: glow,
-        //         alpha: 0,
-        //         duration: 1000,
-        //         yoyo: true,
-        //         repeat: -1
-        //     });
-        // });
-
-        // Set up collisions
-        // this.physics.add.collider(this.stars, this.groundTop);
-        // this.physics.add.collider(this.stars, this.groundBottom);
-        // this.physics.add.collider(this.stars, this.platforms);
-        // this.physics.add.overlap(this.player, this.stars, this.collectStar, undefined, this);
-
+      
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.createQuizDialog();
+        this.physics.add.overlap(
+            this.player,
+            this.wizard,
+            this.handleWizardInteraction,
+            undefined,
+            this
+        );
 
         // Create modal
-        this.createModal();
+        // this.createModal();
 
         EventBus.emit('current-scene-ready', this);
     }
-
-    private createModal() {
-        // Get window dimensions
+    private createQuizDialog() {
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const centerX = width / 2;
-        const centerY = height / 2;
 
-        // Create modal background
-        this.modal = this.add.rectangle(centerX, centerY, 400, 300, 0x000000);
-        this.modal.setStrokeStyle(2, 0x4a90e2);
-        this.modal.setAlpha(0.8);
-        this.modal.setVisible(false);
+        this.quizDialog = this.add.container(width / 2, height / 2);
 
-        // Create modal text with improved styling
-        const modalText = this.add.text(centerX, centerY - 80, 'You collected a star!', {
+        // Create background
+        const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
+
+        // Create close button
+        const closeButton = this.add.text(170, -130, '×', {
             fontSize: '32px',
             color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            align: 'center'
-        });
-        modalText.setOrigin(0.5);
-        modalText.setVisible(false);
+        }).setOrigin(0.5);
+        closeButton.setInteractive({ useHandCursor: true });
+        closeButton.on('pointerdown', () => this.closeQuiz());
+        closeButton.on('pointerover', () => closeButton.setColor('#ff0000'));
+        closeButton.on('pointerout', () => closeButton.setColor('#ffffff'));
 
-        // Create score text with improved styling
-        const scoreText = this.add.text(centerX, centerY - 30, 'Enter your name:', {
+        // Create question text
+        const questionText = this.add.text(0, -100, '', {
             fontSize: '24px',
             color: '#ffffff',
-            fontFamily: 'Arial, sans-serif',
-            align: 'center'
-        });
-        scoreText.setOrigin(0.5);
-        scoreText.setVisible(false);
+            align: 'center',
+        }).setOrigin(0.5);
 
-        // Create HTML input element with improved styling
+        // Create input field instructions
+        const instructions = this.add.text(0, 0, 'Type your answer below and press Enter:', {
+            fontSize: '16px',
+            color: '#ffffff',
+            align: 'center',
+        }).setOrigin(0.5);
+
+        // Create input field
         const input = document.createElement('input');
         input.type = 'text';
-        input.id = 'nameInput';
+        input.id = 'quizInput';
         input.style.position = 'fixed';
-        input.style.left = `${centerX - 100}px`;
-        input.style.top = `${centerY + 10}px`;
+        input.style.left = `${(width / 2) - 100}px`;
+        input.style.top = `${(height / 2) + 20}px`;
         input.style.width = '200px';
-        input.style.padding = '12px';
+        input.style.padding = '8px';
         input.style.fontSize = '16px';
-        input.style.borderRadius = '8px';
-        input.style.border = '2px solid #4a90e2';
-        input.style.outline = 'none';
-        input.style.textAlign = 'center';
+        input.style.border = '1px solid #4a90e2';
+        input.style.borderRadius = '4px';
+        input.style.color = '#000000';
+        input.style.backgroundColor = '#ffffff';
         input.style.display = 'none';
         input.style.zIndex = '1000';
-        input.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        input.style.color = '#2c3e50';
-        input.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-        input.style.transition = 'all 0.3s ease';
-
-        // Add hover effect
-        input.style.transition = 'all 0.3s ease';
-        input.addEventListener('mouseover', () => {
-            input.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-        });
-        input.addEventListener('mouseout', () => {
-            input.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-        });
-
-        // Prevent Phaser from capturing keyboard events when input is focused
-        input.addEventListener('keydown', (e) => {
-            e.stopPropagation();
-            if (e.key === 'Enter') {
-                this.closeModal();
-            }
-        });
+        input.style.opacity = '1';
 
         document.body.appendChild(input);
 
-        // Create continue button with improved styling
-        const continueButton = this.add.rectangle(centerX, centerY + 80, 200, 50, 0x4a90e2);
-        continueButton.setInteractive();
-        continueButton.setVisible(false);
-
-        // Add hover effect to continue button
-        continueButton.on('pointerover', () => {
-            continueButton.setFillStyle(0x357abd);
-            document.body.style.cursor = 'pointer';
-        });
-        continueButton.on('pointerout', () => {
-            continueButton.setFillStyle(0x4a90e2);
-            document.body.style.cursor = 'default';
-        });
-
-        const continueText = this.add.text(centerX, centerY + 80, 'Continue', {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontFamily: 'Arial, sans-serif'
-        });
-        continueText.setOrigin(0.5);
-        continueText.setVisible(false);
-
-        // Add click handler to continue button
-        continueButton.on('pointerdown', () => this.closeModal());
-
-        // Store modal elements for later use
-        this.modalElements = {
-            background: this.modal,
-            text: modalText,
-            scoreText: scoreText,
-            input: input,
-            continueButton: continueButton,
-            continueText: continueText
-        };
+        this.quizDialog.add([background, closeButton, questionText, instructions]);
+        this.quizDialog.setVisible(false);
     }
-
-    private collectStar(player: Phaser.Physics.Arcade.Sprite, star: Phaser.Physics.Arcade.Sprite) {
-        star.destroy();
-        this.score += 10;
-
-        // Show modal and input
-        const scoreText = this.modalElements.scoreText;
-        scoreText.setText('Score: ' + this.score);
-        this.modalElements.background.setVisible(true);
-        this.modalElements.text.setVisible(true);
-        this.modalElements.scoreText.setVisible(true);
-        this.modalElements.input.style.display = 'block';
-        this.modalElements.input.focus();
-        this.modalElements.continueButton.setVisible(true);
-        this.modalElements.continueText.setVisible(true);
-
-        // Pause game physics while modal is shown
-        this.physics.pause();
-    }
-
-    private closeModal() {
-        if (this.modalElements.background.visible) {
-            const inputElement = document.getElementById('nameInput') as HTMLInputElement;
-            const enteredText = inputElement.value;
-            console.log('Text entered:', enteredText);
-            
-            // Clear the input
-            inputElement.value = '';
-            inputElement.style.display = 'none';
-            this.modalElements.background.setVisible(false);
-            this.modalElements.text.setVisible(false);
-            this.modalElements.scoreText.setVisible(false);
-            this.modalElements.continueButton.setVisible(false);
-            this.modalElements.continueText.setVisible(false);
-            this.physics.resume();
+    
+    private handleWizardInteraction() {
+        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {  // Check cooldown
+            this.quizActive = true;
+            this.showQuestion();
+            this.physics.pause();
         }
     }
+    
+    private handleSageInteraction() {
+        if (!this.hasHint) {
+            this.hasHint = true;
+            
+            // Make the sage fade out
+            this.tweens.add({
+                targets: this.sage,
+                alpha: 0,
+                duration: 1000,
+                ease: 'Power2',
+                onComplete: () => {
+                    this.sage.destroy();
+                }
+            });
+        }
+    }
+    
+    private showQuestion() {
+        const questions = [
+            {
+                question: "What is 2 + 2?",
+                correct: "4",
+                hint: "Count your fingers twice"
+            },
+        ];
+    
+        this.currentQuestion = questions[0];
+        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
+        let questionDisplay = this.currentQuestion.question;
+        
+        // Add hint if collected
+        if (this.hasHint) {
+            questionDisplay += `\n\nHint: ${this.currentQuestion.hint}`;
+        }
+        
+        questionText.setText(questionDisplay);
+        this.quizDialog.setVisible(true);
+
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        input.style.display = 'block';
+        input.focus();
+
+        // Remove existing event listener if it exists
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+        }
+
+        // Create and store new event listener
+        this.keydownListener = (event: KeyboardEvent) => {
+            if (event.key === 'Enter') {
+                const userAnswer = input.value.trim();
+                this.checkAnswer(userAnswer);
+            }
+        };
+        input.addEventListener('keydown', this.keydownListener);
+    }
+    
+    private checkAnswer(answer: string) {
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        
+        // Remove the event listener when checking answer
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+            this.keydownListener = null;
+        }
+        
+        input.style.display = 'none';
+        input.value = '';
+
+        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
+        if (answer === this.currentQuestion.correct) {
+            questionText.setText("Correct!");
+            this.quizCompleted = true;
+        } else {
+            questionText.setText("Incorrect, try again!");
+            // Show the question again after a delay if answer was incorrect
+            setTimeout(() => {
+                this.showQuestion();
+            }, 1500);
+        }
+
+        setTimeout(() => {
+            if (answer === this.currentQuestion.correct) {  // Only close if answer was correct
+                this.quizDialog.setVisible(false);
+                this.quizActive = false;
+                this.physics.resume();
+            }
+        }, 1500);
+    }
+    
+    private closeQuiz() {
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        
+        // Remove the event listener when closing quiz
+        if (this.keydownListener) {
+            input.removeEventListener('keydown', this.keydownListener);
+            this.keydownListener = null;
+        }
+        
+        input.style.display = 'none';
+        input.value = '';
+
+        this.quizDialog.setVisible(false);
+        this.quizActive = false;
+        this.physics.resume();
+        
+        // Set cooldown
+        this.quizCooldown = true;
+        setTimeout(() => {
+            this.quizCooldown = false;
+        }, 2000);
+    }
+
+    
 
     update() {
         // Only process movement if modal is not visible and input is not focused
-        if (this.modalElements.background.visible || document.activeElement?.id === 'nameInput') return;
+        // if (this.modalElements.background.visible || document.activeElement?.id === 'nameInput') return;
 
         const onGround = this.player.body.touching.down;
 

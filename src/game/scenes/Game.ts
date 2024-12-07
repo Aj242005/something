@@ -18,6 +18,9 @@ export class Game extends Scene {
     private quizDialog!: Phaser.GameObjects.Container;
     private quizCompleted: boolean = false;
     private keydownListener: ((event: KeyboardEvent) => void) | null = null;
+    private sage!: Phaser.Physics.Arcade.Sprite;
+    private hasHint: boolean = false;
+    private quizCooldown: boolean = false;
 
     constructor() {
         super('Game');
@@ -42,11 +45,9 @@ export class Game extends Scene {
         this.load.image('L2','L2.png')
         this.load.image('B1','B1.png')
         
-        this.load.image('wizard','still position 1.png');
+        this.load.image('wizard','baba1.png');
+        this.load.image('sage', 'wiz2.png');  // Using same image for now, you can replace with different image
 
-
-
-        
         // Load player sprites
         this.load.image('still1', 'still1.png');
         this.load.image('still2', 'still2.png');
@@ -163,26 +164,45 @@ export class Game extends Scene {
             frameRate: 8,
             repeat: 0
         });
-
-        // Add player with improved spawn position
         this.player = this.physics.add.sprite(width * 0.1, height * 0.4, 'still1');
         this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
         this.player.setScale(0.07);
-        
-        // Start with idle animation
         this.player.play('idle');
+        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
+        
+        // Debug visualization of the zone (remove in production)
+        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+
+        // Add overlap detection for scene transition
+        this.physics.add.overlap(
+            this.player,
+            this.targetZone,
+            () => this.scene.start('MainGame1'),
+            undefined,
+            this
+        );
         this.wizard = this.physics.add.sprite(540, 350, 'wizard');
         this.wizard.setBounce(0.1);
-        this.wizard.setScale(0.05);
+        this.wizard.setScale(0.1);
         this.wizard.setGravityY(300); 
         // this.wizard.setImmovable(true);
+        this.wizard.setFlipX(true);
         this.wizard.setCollideWorldBounds(true);
-        this.wizard.play('idle');
+        // this.wizard.play('idle');
+        // Add the sage character
+        this.sage = this.physics.add.sprite(width * 0.8, height * 0.4, 'sage');
+        this.sage.setBounce(0.1);
+        this.sage.setScale(0.05);
+        this.sage.setGravityY(300);
+        this.sage.setCollideWorldBounds(true);
+        this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
 
         // Add Collisions
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.collider(this.wizard, this.platforms);
+        this.physics.add.collider(this.sage, this.platforms);
 
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -196,6 +216,15 @@ export class Game extends Scene {
             this
         );
 
+        // Add overlap with sage
+        this.physics.add.overlap(
+            this.player,
+            this.sage,
+            this.handleSageInteraction,
+            undefined,
+            this
+        );
+
         // Create modal
         // this.createModal();
 
@@ -204,26 +233,36 @@ export class Game extends Scene {
     private createQuizDialog() {
         const width = window.innerWidth;
         const height = window.innerHeight;
-    
+
         this.quizDialog = this.add.container(width / 2, height / 2);
-    
+
         // Create background
         const background = this.add.rectangle(0, 0, 400, 300, 0x000000, 0.8);
-    
+
+        // Create close button
+        const closeButton = this.add.text(170, -130, '×', {
+            fontSize: '32px',
+            color: '#ffffff',
+        }).setOrigin(0.5);
+        closeButton.setInteractive({ useHandCursor: true });
+        closeButton.on('pointerdown', () => this.closeQuiz());
+        closeButton.on('pointerover', () => closeButton.setColor('#ff0000'));
+        closeButton.on('pointerout', () => closeButton.setColor('#ffffff'));
+
         // Create question text
         const questionText = this.add.text(0, -100, '', {
             fontSize: '24px',
             color: '#ffffff',
             align: 'center',
         }).setOrigin(0.5);
-    
+
         // Create input field instructions
         const instructions = this.add.text(0, 0, 'Type your answer below and press Enter:', {
             fontSize: '16px',
             color: '#ffffff',
             align: 'center',
         }).setOrigin(0.5);
-    
+
         // Create input field
         const input = document.createElement('input');
         input.type = 'text';
@@ -239,27 +278,37 @@ export class Game extends Scene {
         input.style.color = '#000000';
         input.style.backgroundColor = '#ffffff';
         input.style.display = 'none';
-        input.style.zIndex = '1000'; // Ensure it's above Phaser canvas
-        input.style.opacity = '1'; // Make sure it's visible
+        input.style.zIndex = '1000';
+        input.style.opacity = '1';
 
-    
         document.body.appendChild(input);
-    
-        this.quizDialog.add([background, questionText, instructions]);
+
+        this.quizDialog.add([background, closeButton, questionText, instructions]);
         this.quizDialog.setVisible(false);
-    
-        this.input.keyboard.on('keydown-SPACE', () => {
-            if (this.quizActive) {
-                this.closeQuiz();
-            }
-        });
     }
     
     private handleWizardInteraction() {
-        if (!this.quizActive && !this.quizCompleted) {  // Check if quiz is not completed
+        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {  // Check cooldown
             this.quizActive = true;
             this.showQuestion();
             this.physics.pause();
+        }
+    }
+    
+    private handleSageInteraction() {
+        if (!this.hasHint) {
+            this.hasHint = true;
+            
+            // Make the sage fade out
+            this.tweens.add({
+                targets: this.sage,
+                alpha: 0,
+                duration: 1000,
+                ease: 'Power2',
+                onComplete: () => {
+                    this.sage.destroy();
+                }
+            });
         }
     }
     
@@ -268,12 +317,20 @@ export class Game extends Scene {
             {
                 question: "What is 2 + 2?",
                 correct: "4",
+                hint: "Count your fingers twice"
             },
         ];
     
         this.currentQuestion = questions[0];
-        const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
-        questionText.setText(this.currentQuestion.question);
+        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
+        let questionDisplay = this.currentQuestion.question;
+        
+        // Add hint if collected
+        if (this.hasHint) {
+            questionDisplay += `\n\nHint: ${this.currentQuestion.hint}`;
+        }
+        
+        questionText.setText(questionDisplay);
         this.quizDialog.setVisible(true);
 
         const input = document.getElementById('quizInput') as HTMLInputElement;
@@ -307,7 +364,7 @@ export class Game extends Scene {
         input.style.display = 'none';
         input.value = '';
 
-        const questionText = this.quizDialog.getAt(1) as Phaser.GameObjects.Text;
+        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
         if (answer === this.currentQuestion.correct) {
             questionText.setText("Correct!");
             this.quizCompleted = true;
@@ -343,6 +400,12 @@ export class Game extends Scene {
         this.quizDialog.setVisible(false);
         this.quizActive = false;
         this.physics.resume();
+        
+        // Set cooldown
+        this.quizCooldown = true;
+        setTimeout(() => {
+            this.quizCooldown = false;
+        }, 2000);
     }
 
     update() {
