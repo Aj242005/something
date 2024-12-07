@@ -30,7 +30,8 @@ const Home: React.FC = () => {
     const [selectedTopic, setSelectedTopic] = useState<'zk' | 'solidity' | null>(null);
     const [roomCode, setRoomCode] = useState<string>("000000000");
     const [loading, setLoading] = useState<boolean>(false);
-
+    const [addressInstance, setAddressInstance] = useState<string>("");
+    const [createdGame, setCreatedGame] = useState<boolean>(false);
     // Stub for JoinRoom component since it's referenced but not defined
     const JoinRoom: React.FC<JoinRoomProps> = ({ onJoinRoom }) => {
         const [code, setCode] = useState('');
@@ -179,6 +180,20 @@ const Home: React.FC = () => {
         navigator.clipboard.writeText(roomCode);
         alert('Code copied to clipboard!');
     };
+  
+    const instances = ["0x34797c42479CA8b332Db4ECE88F8177795cf4CBd" , "0x6FA05361aA892586379219524cE29B35F8eA3332"]; // Array of instances
+    let lastUsedIndex = -1; // Initialize with -1 to indicate no instance has been used yet
+
+
+const loadBalancing = async () => {
+    for (let i = 0; i < instances.length; i++) { // Loop to simulate multiple cycles
+        // Find the next instance, skipping the last used one
+        lastUsedIndex = (lastUsedIndex + 1) 
+        setAddressInstance(instances[lastUsedIndex]);
+    }
+   
+};
+
 
     const handleJoinRoom = async (enteredRoomCode: string) => {
         console.log('Joining room with code:', enteredRoomCode);
