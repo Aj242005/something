@@ -70,63 +70,53 @@ export class Game1 extends Scene {
 
         // Create a single tile platform
         const platform1 = this.platforms.create(174,  565, '2');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
+        platform1.setScale(0.8).refreshBody(); // Reduced scale
         platform1.setAlpha(1); // Slightly 
         const platform2 = this.platforms.create(1920-174,  565, '2');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
+        platform2.setScale(0.8).refreshBody(); // Reduced scale
         platform2.setAlpha(1)
         platform2.setFlipX(true); // Slightly transparent
         const platform3 = this.platforms.create(248,  263, '3');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
-        platform3.setAlpha(1); // Slightly 
+        // 
         const platform4= this.platforms.create(1645,  263, '3');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+       
         platform4.setFlipX(true); // Slightly transparent
         const platform5 = this.platforms.create(114,  890, '1');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+       
         const platform6= this.platforms.create(1799,  890, '1');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+     
         platform6.setFlipX(true); // Slightly transparent
         const platform7 = this.platforms.create(929,  838, '8');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+        
         const platform8= this.platforms.create(985,  838, '8');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+      
         platform8.setFlipX(true); // Slightly transparent
         const platform9= this.platforms.create(540,  404, '4');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+       
         const platform10 = this.platforms.create(1379,  404, '4');
         platform10.setScale(1).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+       // Slightly 
         platform10.setFlipX(true); // Slightly transparent
         const platform11 = this.platforms.create(955,  349, '62');
         platform11.setScale(0.8).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+       
         platform11.setFlipX(true); // Slightly transparent
-        const platform12 = this.platforms.create(836,  395, '61');
+        const platform12 = this.platforms.create(857,  390, '61');
         platform12.setScale(0.8).refreshBody(); // Reduced scale
         platform12.setAlpha(1); // Slightly 
-        const platform13= this.platforms.create(1081,  395, '63');
+        const platform13= this.platforms.create(1054,  390, '63');
         platform13.setScale(0.8).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
-        const platform14 = this.platforms.create(717,  701, '71');
+        const platform14 = this.platforms.create(717,  701, '72');
         // platform12.setScale(0.8).refreshBody(); // Reduced scale
         platform12.setAlpha(1); // Slightly 
-        const platform15= this.platforms.create(481,  726, '72');
+        const platform15= this.platforms.create(481,  726, '71');
         // platform13.setScale(0.8).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
-        const platform16 = this.platforms.create(1196,  701, '71');
+        const platform16 = this.platforms.create(1196,  701, '72');
         // platform12.setScale(0.8).refreshBody(); // Reduced scale
         platform12.setAlpha(1); // Slightly 
         platform16.setFlipX(true); // Slightly transparent
-        const platform17= this.platforms.create(1437,  726, '72');
+        const platform17= this.platforms.create(1437,  726, '71');
         // platform13.setScale(0.8).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
         platform17.setFlipX(true); // Slightly transparent
 
         // platform13.setFlipX(true); // Slightly transparent
