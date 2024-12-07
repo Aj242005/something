@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownBasename, WalletDropdownDisconnect } from "@coinbase/onchainkit/wallet";
+import { Address, Avatar, Name, Identity, EthBalance } from "@coinbase/onchainkit/identity";
+import { color } from "@coinbase/onchainkit/theme";
 
 const Home = () => {
     const [isGameStarted, setIsGameStarted] = useState(false);
@@ -6,9 +9,32 @@ const Home = () => {
     const handlePlayClick = () => {
         setIsGameStarted(true);
     };
+    
+    
+
 
     return (
         <div className="relative">
+            <div className="flex flex-col items-center mt-4 bg-white/10 rounded-lg p-6 shadow-lg backdrop-blur-md space-y-4">
+          <Wallet>
+            <ConnectWallet className="flex items-center space-x-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg shadow-md transition-transform duration-300 hover:scale-105">
+              <Avatar className="h-8 w-8 rounded-full" />
+              <span className="font-semibold">Connect Wallet</span>
+            </ConnectWallet>
+            <WalletDropdown>
+              <Identity className="px-4 pt-3 pb-2 text-white space-y-3 bg-gray-800 rounded-lg shadow-md">
+                <Avatar className="h-12 w-12" />
+                <Name className="font-bold text-lg" />
+                <Address className={`text-sm ${color.foregroundMuted}`} />
+                <EthBalance className="font-medium text-white/90" />
+              </Identity>
+              <WalletDropdownBasename className="text-sm text-gray-300 hover:text-white" />
+              <button className="mt-4 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md">
+                <WalletDropdownDisconnect />
+              </button>
+            </WalletDropdown>
+          </Wallet>
+        </div>
             <div 
                 className="min-h-screen w-full"
                 style={{

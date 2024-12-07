@@ -28,6 +28,7 @@
         "build-nolog": "next build"
     },
     "dependencies": {
+        "@coinbase/onchainkit": "^0.35.8",
         "framer-motion": "^11.13.1",
         "next": "14.2.3",
         "phaser": "^3.87.0",
