@@ -73,6 +73,7 @@ export class Game2 extends Scene {
         platform1.setScale(1.6).refreshBody(); // Reduced scale
         platform1.setAlpha(1); // Slightly 
         const platform12 = this.platforms.create(1589,  836, 'T');
+        // platform12.setAlpha(1);
         const platform2 = this.platforms.create(625,  627, 'U');
         platform2.setScale(1.6).refreshBody(); // Reduced scale
         platform2.setAlpha(1)
