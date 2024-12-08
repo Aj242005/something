@@ -114,7 +114,7 @@ forge test
 forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
-### Hardhat Commands
+### Hardhat Commands (Currently Unavalible)
 ```bash
 # Compile contracts
 npx hardhat compile
