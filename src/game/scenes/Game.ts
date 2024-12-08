@@ -53,7 +53,7 @@ export class Game extends Scene {
         this.load.image('wrong_answer', 'wrong_answer.svg');
         this.load.image('wizard','baba1.png');
         this.load.image('sage', 'rst.png');  // Using same image for now, you can replace with different image
-        this.load.image('arrow','arrow.svg')
+        this.load.image('arrow','arrow2.svg')
         // Load player sprites
         this.load.image('still1', 'still1.png');
         this.load.image('still2', 'still2.png');
@@ -187,8 +187,10 @@ export class Game extends Scene {
         this.player.play('idle');
         this.targetZone = this.add.zone(1800 ,800, 100, 100);
         this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
-        const arr = this.add.image(1800, 840, 'arrow');
-        arr.setScale(0.6);
+        if(this.quizCompleted){
+            const arr = this.add.image(1800, 840, 'arrow');
+            arr.setScale(0.6);
+        }
         
         // Debug visualization of the zone (remove in production)
         // this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
@@ -436,6 +438,8 @@ export class Game extends Scene {
             
 
             this.quizCompleted = true;
+            const arr = this.add.image(1800, 840, 'arrow');
+            arr.setScale(0.6);
         } else {
             questionText.setText("Incorrect, try again!");
             // Show the question again after a delay if answer was incorrect
@@ -448,6 +452,7 @@ export class Game extends Scene {
             if (answer === '54') {  // Only close if answer was correct
                 this.quizDialog.setVisible(false);
                 this.hintDialog.setVisible(false);
+                this.quizCompleted=true;
                 
 
                 this.quizActive = false;

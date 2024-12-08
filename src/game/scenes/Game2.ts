@@ -181,8 +181,9 @@ export class Game2 extends Scene {
         this.wizard.setFlipX(false);
         this.targetZone = this.add.zone(1800 ,800, 100, 100);
         this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
-        const arr = this.add.image(1800, 840, 'arrow');
-        arr.setScale(0.6);
+        
+        // const arr = this.add.image(1800, 840, 'arrow');
+        // arr.setScale(0.6);
 
         // Add overlap detection for scene transition
         this.physics.add.overlap(
@@ -417,6 +418,8 @@ export class Game2 extends Scene {
         if (answer === '14') {
             // questionText.setText("Correct!");
             this.quizCompleted = true;
+            const arr = this.add.image(1800, 840, 'arrow');
+            arr.setScale(0.6);
         } else {
             questionText.setText("Incorrect, try again!");
             // Show the question again after a delay if answer was incorrect
