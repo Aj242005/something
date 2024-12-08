@@ -47,8 +47,8 @@ export class Game1 extends Scene {
         this.load.image('hint2', 'Q2hint.svg');
 
         this.load.image('wizard', 'baba.png');
-        
-
+        this.load.image('arrow','arrow.svg')
+        this.load.image('sage', 'rst.png');  // Using same image for now, you can replace with different image
 
         
         // Load player sprites
@@ -186,22 +186,21 @@ export class Game1 extends Scene {
         this.player = this.physics.add.sprite(width * 0.1, height * 0.4, 'still1');
         this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(0.06);
+        this.player.setScale(0.085);
         
         // Start with idle animation
         this.player.play('idle');
         this.wizard = this.physics.add.sprite(540, 350, 'wizard');
         this.wizard.setBounce(0.1);
-        this.wizard.setScale(0.1);
+        this.wizard.setScale(0.12);
         this.wizard.setGravityY(300); 
         // this.wizard.setImmovable(true);
         this.wizard.setFlipX(true);
         // this.wizard.setCollideWorldBounds(true);
-        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.targetZone = this.add.zone(1800 ,800, 100, 100);
         this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
-        
-        // Debug visualization of the zone (remove in production)
-        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+        const arr = this.add.image(1800, 840, 'arrow');
+        arr.setScale(0.6);
 
         // Add overlap detection for scene transition
         this.physics.add.overlap(
@@ -220,7 +219,7 @@ export class Game1 extends Scene {
         this.sage.setScale(1);
         this.sage.setGravityY(300);
         this.sage.setCollideWorldBounds(true);
-        this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
+        // this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
 
         // Add Collisions
         this.physics.add.collider(this.player, this.platforms);
@@ -346,7 +345,7 @@ export class Game1 extends Scene {
         closeButton.on('pointerdown', () => hintDialog.setVisible(false));
     
         // Create hint image
-        const hintImage = this.add.image(0, -145, 'hint2').setOrigin(0.5);
+        const hintImage = this.add.image(0, -146, 'hint2').setOrigin(0.5);
     
         hintDialog.add([background, closeButton, hintImage]);
         hintDialog.setVisible(false);
@@ -384,7 +383,7 @@ export class Game1 extends Scene {
     private showQuestion() {
         const questions = [
             {
-                questionImageKey: "question2", // Key for the question PNG
+                questionImageKey1: "question2", // Key for the question PNG
                 correct: "54",
                 
             },
@@ -392,7 +391,7 @@ export class Game1 extends Scene {
     
         this.currentQuestion = questions[0];
         const questionImage = this.quizDialog.getAt(2) as Phaser.GameObjects.Image;
-        questionImage.setTexture(this.currentQuestion.questionImageKey);
+        questionImage.setTexture(this.currentQuestion.questionImageKey1);
         
         // Add hint if collected
         if (this.hasHint) {
@@ -434,8 +433,7 @@ export class Game1 extends Scene {
         input.value = '';
 
         const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
-        if (answer === this.currentQuestion.correct) {
-            questionText.setText("Correct!");
+        if (answer === '35') {
             this.quizCompleted = true;
         } else {
             questionText.setText("Incorrect, try again!");
@@ -446,8 +444,9 @@ export class Game1 extends Scene {
         }
 
         setTimeout(() => {
-            if (answer === this.currentQuestion.correct) {  // Only close if answer was correct
+            if (answer === '35') {  // Only close if answer was correct
                 this.quizDialog.setVisible(false);
+                this.hintDialog.setVisible(false);
                 this.quizActive = false;
                 this.physics.resume();
             }

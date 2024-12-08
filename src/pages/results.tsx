@@ -111,20 +111,18 @@ const ResultsPage: React.FC = () => {
 
             {/* Display the command output */}
             {!loading && (
-                <div
-                    style={{
-                        position: 'relative',
-                        zIndex: 1,
-                        textAlign: 'center',
-                        padding: '20px',
-                        backgroundColor: '#1F2B17',
-                        borderRadius: '8px',
-                        width: '80%',
-                        color: 'white',
-                    }}
-                >
-                    
-                </div>
+                <img
+                src="/assets/end.svg"
+                alt="Loading..."
+                style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    top: 0,
+                    left: 0,
+                }}
+            />
             )}
         </div>
     );

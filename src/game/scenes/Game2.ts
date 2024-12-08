@@ -38,9 +38,11 @@ export class Game2 extends Scene {
         this.load.image('r-3','r-3.png')
         this.load.image('t-3','t-3.png')
         this.load.image('g-3','g-3.png')
-        this.load.image('question3','Q3normal.svg')
+        this.load.image('question3','Q3normaal.svg')
         this.load.image('hint3','Q3hint.png')
-        this.load.image('sage', 'star.png');  // Using same image for now, you can replace with different image
+        this.load.image('sage', 'rst.png');  // Using same image for now, you can replace with different image
+        this.load.image('arrow','arrow.svg')
+        this.load.image('wizard', 'baba1.png');
 
        
 
@@ -72,50 +74,48 @@ export class Game2 extends Scene {
         this.platforms = this.physics.add.staticGroup();
 
         // Create a single tile platform
-        const platform1 = this.platforms.create(332,  836, 'T');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+        // const platform1 = this.platforms.create(332,  836, 'T');
+        // platform1.setScale(1.6).refreshBody(); // Reduced scale
+        // platform1.setAlpha(1); // Slightly 
         const platform12 = this.platforms.create(1589,  836, 'T');
-        // platform12.setAlpha(1);
-        const platform2 = this.platforms.create(625,  627, 'U');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
+        platform12.setAlpha(1);
+        const platform2 = this.platforms.create(525,  627, 'U');
+        platform2.setScale(1).refreshBody(); // Reduced scale
         platform2.setAlpha(1)
         platform2.setFlipX(true); // Slightly transparent
         const platform13 = this.platforms.create(1291,  627, 'U');
-        const platform3 = this.platforms.create(248,  263, 'V');
-        const platform11 = this.platforms.create(1561,  263, 'V');
-        platform11.setFlipX(true); // Slightly transparent
+        // const platform3 = this.platforms.create(248,  263, 'V');
+        // const platform11 = this.platforms.create(1561,  263, 'V');
+        // platform11.setFlipX(true); // Slightly transparent
 
         // platform1.setScale(1.6).refreshBody(); // Reduced scale
         // platform3.setAlpha(1); // Slightly 
-        const platform4= this.platforms.create(407,  966, 'W');
+        // const platform4= this.platforms.create(407,  966, 'W');
         // platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+    
         // platform4.setFlipX(true); // Slightly transparent
-        const platform5 = this.platforms.create(620,  299, 'X2');
+        // const platform5 = this.platforms.create(620,  299, 'X2');
         // platform1.setScale(1.6).refreshBody(); // Reduced scale
         // platform1.setAlpha(1); // Slightly 
-        const platform16= this.platforms.create(1617,  299, 'X2');
-        platform16.setFlipX(true); // Slightly transparent
-        const platform6= this.platforms.create(678,  184, 'X1');
+        // const platform16= this.platforms.create(1617,  299, 'X2');
+        // platform16.setFlipX(true); // Slightly transparent
+        // const platform6= this.platforms.create(678,  184, 'X1');
         // platform2.setScale(1.6).refreshBody(); // Reduced scale
         // platform2.setAlpha(1)
         // platform6.setFlipX(true); // Slightly transparent
-        const platform17 = this.platforms.create(1740,  184, 'X1');
-        platform17.setFlipX(true); // Slightly transparent
-        const platform7 = this.platforms.create(567,  952, 'S');
-        platform1.setScale(1.6).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+        // const platform17 = this.platforms.create(1740,  184, 'X1');
+        // platform17.setFlipX(true); // Slightly transparent
+        // const platform7 = this.platforms.create(567,  952, 'S');
+        // platform1.setScale(1.6).refreshBody(); // Reduced scale
+        // platform1.setAlpha(1); // Slightly 
         const platform8= this.platforms.create(960,  787, 'Z2');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+        
         // platform8.setFlipX(true); // Slightly transparent
         const platform9= this.platforms.create(809,  840, 'Z1');
-        platform2.setScale(1.6).refreshBody(); // Reduced scale
-        platform2.setAlpha(1)
+        
         const platform10 = this.platforms.create(1114,  840, 'Z3');
         platform10.setScale(1).refreshBody(); // Reduced scale
-        platform1.setAlpha(1); // Slightly 
+        // platform1.setAlpha(1); // Slightly 
         const platform18 = this.platforms.create(30,  549, 'l-3');
         // platform18.setFlipX(true); // Slightly transparent
         platform18.setAlpha(0);
@@ -172,18 +172,17 @@ export class Game2 extends Scene {
         this.player = this.physics.add.sprite(width * 0.1, height * 0.4, 'still1');
         this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(0.06);
+        this.player.setScale(0.085);
         this.wizard = this.physics.add.sprite(540, 350, 'wizard');
         this.wizard.setBounce(0.1);
-        this.wizard.setScale(0.1);
+        this.wizard.setScale(0.12);
         this.wizard.setGravityY(300); 
         // this.wizard.setImmovable(true);
-        this.wizard.setFlipX(true);
-        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.wizard.setFlipX(false);
+        this.targetZone = this.add.zone(1800 ,800, 100, 100);
         this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
-        
-        // Debug visualization of the zone (remove in production)
-        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+        const arr = this.add.image(1800, 840, 'arrow');
+        arr.setScale(0.6);
 
         // Add overlap detection for scene transition
         this.physics.add.overlap(
@@ -203,7 +202,7 @@ export class Game2 extends Scene {
         this.sage.setScale(1);
         this.sage.setGravityY(300);
         this.sage.setCollideWorldBounds(true);
-        this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
+        // this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
 
         // Add Collisions
         this.physics.add.collider(this.player, this.platforms);
@@ -261,7 +260,7 @@ export class Game2 extends Scene {
         closeButton.on('pointerdown', () => this.closeQuiz());
         closeButton.on('pointerover', () => closeButton.setColor('#ff0000'));
         closeButton.on('pointerout', () => closeButton.setColor('#ffffff'));
-        const questionImage = this.add.image(0, -20, 'question3').setOrigin(0.5);
+        const questionImage = this.add.image(0, -65, 'question3').setOrigin(0.5);
 
 
         // Create input field instructions
@@ -365,7 +364,7 @@ export class Game2 extends Scene {
     private showQuestion() {
         const questions = [
             {
-                questionImageKey: "question2", // Key for the question PNG
+                questionImageKey: "question3", // Key for the question PNG
                 correct: "54",
                 
             },
@@ -415,8 +414,8 @@ export class Game2 extends Scene {
         input.value = '';
 
         const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
-        if (answer === this.currentQuestion.correct) {
-            questionText.setText("Correct!");
+        if (answer === '14') {
+            // questionText.setText("Correct!");
             this.quizCompleted = true;
         } else {
             questionText.setText("Incorrect, try again!");
@@ -427,8 +426,9 @@ export class Game2 extends Scene {
         }
 
         setTimeout(() => {
-            if (answer === this.currentQuestion.correct) {  // Only close if answer was correct
+            if (answer === '14') {  // Only close if answer was correct
                 this.quizDialog.setVisible(false);
+                this.hintDialog.setVisible(false);
                 this.quizActive = false;
                 this.physics.resume();
             }

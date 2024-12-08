@@ -155,7 +155,7 @@ const Home: React.FC = () => {
                 ];
                 const Baseprovider = new ethers.JsonRpcProvider("https://base-sepolia.g.alchemy.com/v2/9epB18aWeXPPH4GFsiiQhk8CoM1p-L6B");
                 const newWallet = new ethers.Wallet(privateKey, Baseprovider);
-                const newContract = new ethers.Contract("0xE99C30a3703824963deebDD772289B288CC673e7", newABI, newWallet);
+                const newContract = new ethers.Contract("0xF77B941CfD9EfC959459643b4F17E9Ed89Bd3739", newABI, newWallet);
                 const tx = await newContract.initializeGame(signerAddress, gameType, roomNumber);
                 console.log('Transaction sent:', tx);
                 alert('Game created successfully! on base network with hash: ' + tx.hash);

@@ -50,9 +50,10 @@ export class Game extends Scene {
         this.load.image('r-1','r-1.png')
         this.load.image('t-1','t-1.png')
         this.load.image('correct_answer', 'correct_answer.svg');
+        this.load.image('wrong_answer', 'wrong_answer.svg');
         this.load.image('wizard','baba1.png');
-        this.load.image('sage', 'star.png');  // Using same image for now, you can replace with different image
-
+        this.load.image('sage', 'rst.png');  // Using same image for now, you can replace with different image
+        this.load.image('arrow','arrow.svg')
         // Load player sprites
         this.load.image('still1', 'still1.png');
         this.load.image('still2', 'still2.png');
@@ -182,13 +183,15 @@ export class Game extends Scene {
         this.player = this.physics.add.sprite(width * 0.1, height * 0.4, 'still1');
         this.player.setBounce(0.1);
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(0.07);
+        this.player.setScale(0.085);
         this.player.play('idle');
-        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.targetZone = this.add.zone(1800 ,800, 100, 100);
         this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
+        const arr = this.add.image(1800, 840, 'arrow');
+        arr.setScale(0.6);
         
         // Debug visualization of the zone (remove in production)
-        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+        // this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
 
         // Add overlap detection for scene transition
         this.physics.add.overlap(
@@ -198,9 +201,9 @@ export class Game extends Scene {
             undefined,
             this
         );
-        this.wizard = this.physics.add.sprite(540, 350, 'wizard');
+        this.wizard = this.physics.add.sprite(556, 150, 'wizard');
         this.wizard.setBounce(0.1);
-        this.wizard.setScale(0.1);
+        this.wizard.setScale(0.12);
         this.wizard.setGravityY(300); 
         // this.wizard.setImmovable(true);
         this.wizard.setFlipX(true);
@@ -212,7 +215,7 @@ export class Game extends Scene {
         this.sage.setScale(1);
         this.sage.setGravityY(300);
         this.sage.setCollideWorldBounds(true);
-        this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
+        // this.sage.setTint(0x00ff00);  // Give it a green tint to distinguish from wizard
 
         // Add Collisions
         this.physics.add.collider(this.player, this.platforms);
@@ -349,10 +352,13 @@ export class Game extends Scene {
     
     
     private handleWizardInteraction() {
-        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {  // Check cooldown
+        // Check if quiz is not active and not completed
+        if (!this.quizActive && !this.quizCompleted && !this.quizCooldown) {
             this.quizActive = true;
             this.showQuestion();
-            this.physics.pause();
+            
+            // Do not pause physics, allow player movement
+            // this.physics.pause(); // Comment out or remove this line
         }
     }
     
@@ -413,70 +419,10 @@ export class Game extends Scene {
         input.addEventListener('keydown', this.keydownListener);
     }
     
-    private checkAnswer(userAnswer: string) {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        // Hide input
-        const input = document.getElementById('quizInput') as HTMLInputElement;
-        input.style.display = 'none';
-
-        // Disable question1 and hint1
-        this.quizDialog.getAt(2).setInteractive(false);
-        this.hintDialog.getAt(2).setInteractive(false);
-
-        // Check if the answer is correct (54)
-        if (userAnswer === '54') {
-            // Show correct answer image
-            const correctAnswerImage = this.add.image(
-                width / 2, 
-                height / 2, 
-                'correct_answer'
-            )
-                .setOrigin(0.5)
-                .setScale(0.5);
-
-            // Restore after 2 seconds
-            this.time.delayedCall(2000, () => {
-                // Show input again
-                input.style.display = 'block';
-                
-                // Remove correct answer image
-                correctAnswerImage.destroy();
-
-                // Re-enable interactions
-                this.quizDialog.getAt(2).setInteractive(true);
-                this.hintDialog.getAt(2).setInteractive(true);
-            });
-        } else {
-            // Show wrong answer image
-            const wrongAnswerImage = this.add.image(
-                width / 2, 
-                height / 2, 
-                'wrong_answer'
-            )
-                .setOrigin(0.5)
-                .setScale(0.5);
-
-            // Restore after 2 seconds
-            this.time.delayedCall(2000, () => {
-                // Show input again
-                input.style.display = 'block';
-                
-                // Remove wrong answer image
-                wrongAnswerImage.destroy();
-
-                // Re-enable interactions
-                this.quizDialog.getAt(2).setInteractive(true);
-                this.hintDialog.getAt(2).setInteractive(true);
-            });
-        }
-    }
-
-    private closeQuiz() {
+    private checkAnswer(answer: string) {
         const input = document.getElementById('quizInput') as HTMLInputElement;
         
-        // Remove the event listener when closing quiz
+        // Remove the event listener when checking answer
         if (this.keydownListener) {
             input.removeEventListener('keydown', this.keydownListener);
             this.keydownListener = null;
@@ -485,9 +431,41 @@ export class Game extends Scene {
         input.style.display = 'none';
         input.value = '';
 
+        const questionText = this.quizDialog.getAt(2) as Phaser.GameObjects.Text;
+        if (answer === '54') {
+            
+
+            this.quizCompleted = true;
+        } else {
+            questionText.setText("Incorrect, try again!");
+            // Show the question again after a delay if answer was incorrect
+            setTimeout(() => {
+                this.showQuestion();
+            }, 1500);
+        }
+
+        setTimeout(() => {
+            if (answer === '54') {  // Only close if answer was correct
+                this.quizDialog.setVisible(false);
+                this.hintDialog.setVisible(false);
+                
+
+                this.quizActive = false;
+                this.physics.resume();
+            }
+        }, 1500);
+    }
+
+    private closeQuiz() {
+        const input = document.getElementById('quizInput') as HTMLInputElement;
+        input.style.display = 'none';
+        input.value = '';
+
         this.quizDialog.setVisible(false);
         this.quizActive = false;
-        this.physics.resume();
+        
+        // Do not resume physics to maintain player movement
+        // this.physics.resume(); // Comment out or remove this line
         
         // Set cooldown
         this.quizCooldown = true;
