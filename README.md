@@ -7,7 +7,7 @@
 ## 🌟 Key Features
 
 - **Zero-Knowledge Learning**: Explore blockchain concepts without intrusive wallet interactions
-- **Seamless Onboarding**: Minimal friction with advanced ZK proof generation
+- **Seamless Onboarding**: Minimal friction with advanced SP1 proof generation
 - **Skill Validation**: On-chain proof of completion
 - **Collaborative Learning**: Foster knowledge exchange and community building
 
@@ -25,6 +25,7 @@ ChillQuest revolutionizes blockchain learning by:
 - Generating ZK proofs using Succinct Prover Network
 - Aggregating level-specific ZK equality circuit proofs
 - Verifying comprehensive proof via Polygon zkEVM
+- Major transactions happening on fastest of L2s
 - Eliminating repetitive MetaMask wallet popups
 
 ## 📚 Learning Paths
