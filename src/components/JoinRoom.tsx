@@ -1,123 +1,149 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-interface JoinRoomProps {
-    initialRoomCode?: string;
-    onJoinRoom: (roomCode: string) => void;
+interface RoomCodeProps {
+    numbers: string;  // Should be exactly 9 digits
+    onStartGame?: () => void;
+    onCopyCode?: () => void;
 }
 
-const JoinRoom: React.FC<JoinRoomProps> = ({ 
-    initialRoomCode = '00000000000', 
-    onJoinRoom 
-}) => {
-    const [roomCode, setRoomCode] = useState<string[]>(initialRoomCode.split(''));
+const RoomCode: React.FC<RoomCodeProps> = ({ numbers = "000000000", onStartGame, onCopyCode }) => {
+    // Ensure we always have 9 digits, pad with zeros if needed
+    const normalizedNumbers = numbers.padEnd(9, '0').slice(0, 9);
+    const numberArray = normalizedNumbers.split('');
 
-    const handleInputChange = (index: number, value: string) => {
-        // Skip changes for hyphen positions
-        if (index === 3 || index === 7 || index === 11) return;
-
-        const newRoomCode = [...roomCode];
-        newRoomCode[index] = value.slice(0, 1) || '0';
-        setRoomCode(newRoomCode);
-    };
-
-    const handleJoinRoom = () => {
-        const code = roomCode.join('');
-        onJoinRoom(code);
+    const renderNumberGroup = (start: number, end: number) => {
+        return (
+            <div style={{justifyContent: 'flex-start', alignItems: 'center', gap: 18.65, display: 'flex'}}>
+                {numberArray.slice(start, end).map((num, index) => (
+                    <div key={start + index} style={{
+                        width: 109.59,
+                        height: 109.59,
+                        paddingLeft: 38.86,
+                        paddingRight: 38.86,
+                        paddingTop: 31.87,
+                        paddingBottom: 31.87,
+                        border: '6.22px #1F2B17 solid',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 7.77,
+                        display: 'inline-flex'
+                    }}>
+                        <div style={{
+                            textAlign: 'center',
+                            color: '#1F2B17',
+                            fontSize: 37.31,
+                            fontFamily: 'Satoshi',
+                            fontWeight: '900',
+                            wordWrap: 'break-word'
+                        }}>
+                            {num}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     return (
         <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'Satoshi',
-            gap: '48px'
+            width: '100%', 
+            height: '100%', 
+            flexDirection: 'column', 
+            justifyContent: 'flex-start', 
+            alignItems: 'flex-start', 
+            gap: 48, 
+            display: 'inline-flex',
+            fontFamily: 'Satoshi'
         }}>
-            <img 
-                src="/assets/enter_code.svg" 
-                alt="Enter Code"
-                style={{
-                    width: '600px',
-                    objectFit: 'contain'
-                }}
-            />
-            
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '18.65px'
-            }}>
-                {roomCode.map((digit, index) => (
-                    <div 
-                        key={index}
-                        style={{
-                            width: '109.59px',
-                            height: '109.59px',
-                            border: '6.22px solid #1F2B17',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        {(index === 3 || index === 7 || index === 11) ? (
-                            <div style={{
-                                color: '#1F2B17',
-                                fontSize: '37.31px',
-                                fontFamily: 'Satoshi',
-                                fontWeight: '900',
-                                textAlign: 'center',
-                                width: '100%'
-                            }}>
-                                -
-                            </div>
-                        ) : (
-                            <input 
-                                type="text" 
-                                pattern="[0-9]"
-                                maxLength={1}
-                                value={digit}
-                                onChange={(e) => handleInputChange(index, e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    textAlign: 'center',
-                                    color: '#1F2B17',
-                                    fontSize: '37.31px',
-                                    fontFamily: 'Satoshi',
-                                    fontWeight: '900',
-                                    border: 'none',
-                                    background: 'transparent',
-                                    outline: 'none'
-                                }}
-                            />
-                        )}
-                    </div>
-                ))}
-            </div>
-            
-            <button 
-                onClick={handleJoinRoom}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer'
-                }}
-            >
+            <div style={{alignSelf: 'stretch', height: 191.59, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 24, display: 'flex'}}>
                 <img 
-                    src="/assets/join_game.svg" 
-                    alt="Join Game"
+                    src="/assets/room_code.svg" 
+                    alt="Room Code"
                     style={{
-                        width: '486px',
-                        height: '122px',
+                        alignSelf: 'stretch',
+                        height: 48,
                         objectFit: 'contain'
                     }}
                 />
-            </button>
+                <div style={{justifyContent: 'flex-start', alignItems: 'center', gap: 18.65, display: 'inline-flex'}}>
+                    {renderNumberGroup(0, 3)}
+                    <div style={{
+                        width: 109.59,
+                        height: 109.59,
+                        paddingLeft: 38.86,
+                        paddingRight: 38.86,
+                        paddingTop: 31.87,
+                        paddingBottom: 31.87,
+                        border: '6.22px solid',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 7.77,
+                        display: 'inline-flex'
+                    }}>
+                        <div style={{
+                            textAlign: 'center', 
+                            color: '#1F2B17', 
+                            fontSize: 37.31, 
+                            fontFamily: 'Satoshi',
+                            fontWeight: '900',
+                            wordWrap: 'break-word'
+                        }}>-</div>
+                    </div>
+                    {renderNumberGroup(3, 6)}
+                    <div style={{
+                        width: 109.59,
+                        height: 109.59,
+                        paddingLeft: 38.86,
+                        paddingRight: 38.86,
+                        paddingTop: 31.87,
+                        paddingBottom: 31.87,
+                        border: '6.22px solid',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 7.77,
+                        display: 'inline-flex'
+                    }}>
+                        <div style={{
+                            textAlign: 'center', 
+                            color: '#1F2B17', 
+                            fontSize: 37.31, 
+                            fontFamily: 'Satoshi',
+                            fontWeight: '900',
+                            wordWrap: 'break-word'
+                        }}>-</div>
+                    </div>
+                    {renderNumberGroup(6, 9)}
+                </div>
+            </div>
+            <div style={{justifyContent: 'flex-start', alignItems: 'center', gap: 700, display: 'inline-flex'}}>
+                <button 
+                    onClick={onStartGame}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <img 
+                        src="/assets/join_room.svg" 
+                        alt="Start Game"
+                        style={{
+                            height: 80,
+                            objectFit: 'contain'
+                        }}
+                    />
+                </button>
+               
+            </div>
         </div>
     );
 };
 
-export default JoinRoom;
+export default RoomCode;

@@ -346,7 +346,7 @@ export class Game1 extends Scene {
         closeButton.on('pointerdown', () => hintDialog.setVisible(false));
     
         // Create hint image
-        const hintImage = this.add.image(0, -146, 'hint2').setOrigin(0.5);
+        const hintImage = this.add.image(0, -145, 'hint2').setOrigin(0.5);
     
         hintDialog.add([background, closeButton, hintImage]);
         hintDialog.setVisible(false);

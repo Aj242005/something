@@ -179,6 +179,22 @@ export class Game2 extends Scene {
         this.wizard.setGravityY(300); 
         // this.wizard.setImmovable(true);
         this.wizard.setFlipX(true);
+        this.targetZone = this.add.zone(100, 800, 100, 100);
+        this.physics.world.enable(this.targetZone, Phaser.Physics.Arcade.STATIC_BODY);
+        
+        // Debug visualization of the zone (remove in production)
+        this.add.rectangle(100, 800, 100, 100, 0xff0000, 0.3);
+
+        // Add overlap detection for scene transition
+        this.physics.add.overlap(
+            this.player,
+            this.targetZone,
+            () => {
+                window.location.href = '/results'; // Redirect to the /results page
+            },
+            undefined,
+            this
+        );
         
         // Start with idle animation
         this.player.play('idle');
